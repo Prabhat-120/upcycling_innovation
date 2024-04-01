@@ -4,12 +4,9 @@ const jwt = require("jsonwebtoken");
 const genotp = require("../services/OtpServices");
 const transporter = require("../Config/mailconfig");
 const OTP = require("../models/otpModel");
-const Order = require("../models/orderModel");
-const { isValidPassword, isValidEmail } = require("../Validator/validator");
-const Product = require("../models/productCategoryModel");
-const Services = require("../models/serviceModel");
-const subService = require("../models/subService");
-
+//const Order = require("../models/orderModel");
+const Product = require("../models/categoriesModel");
+//const Services = require("../models/serviceModel");
 const secretkey = process.env.SECRETKEY;
 
 //for send otp to gmail verify and register the designer account
@@ -44,99 +41,42 @@ const sendotp = async (req, res) => {
 //For Designer register
 const signup = async (req, res) => {
   try {
-    const {
-      name,
-      mob,
-      email,
-      address,
-      location,
-      categories,
-      services,
-      subservices,
-      Bio,
-      password,
-      conf_password,
-      term_cond,
-      otp,
-    } = req.body;
+    const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
+    const profile_pic = req.file.filename;
+    
+    console.log(req.body);
+    console.log(profile_pic);
 
-    const profile_pic = req.file ? req.file.filename : null;
-
-    if (
-      !name ||
-      !mob ||
-      !email ||
-      !profile_pic ||
-      !address ||
-      !location ||
-      !categories ||
-      !services ||
-      !subservices ||
-      !Bio ||
-      !password ||
-      !conf_password ||
-      !term_cond ||
-      !otp
-    ) {
-      return res.send("all field are required 123");
+    const existDesigner = await Designer.findOne({ email });
+    if (existDesigner) {
+      return res.status(409).json({ status: "Failed", message: "Email already exists" });
     }
 
-    //validat email format ex: @gamil.com
-    let checkEmail = isValidEmail(email);
-    if (!checkEmail) {
-      return res.status(400).json({ message: "Invalid email address" });
-    }
+    const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
 
-    // Validate password strength (e.g., minimum length, presence of special characters)
-    let reso = isValidPassword(password);
-    if (!reso) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
-        });
-    }
-
-    if (password !== conf_password) {
-      return res.status(400).json({ message: "Passwords do not match" });
-    }
-
-    const existingUser = await Designer.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered" });
-    }
-
-    const latestOtp = await OTP.find({ email })
-      .sort({ expiresAt: -1 })
-      .limit(1);
-
-    if (
-      !latestOtp.length ||
-      latestOtp[0].otp !== parseInt(otp) ||
-      latestOtp[0].expiresAt < new Date()
-    ) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+    if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
+      return res.status(401).json({ message: "Invalid or expired OTP" });
     }
 
     const hashpassword = await bcrypt.hash(password, 10);
-    const coordinates = location.coordinates
-      .split(",")
-      .map((coord) => parseFloat(coord.trim()));
+
+    let coordinat = null;
+    if (location) {
+      coordinat = location.split(",").map(coord => parseFloat(coord.trim()));
+    }
 
     const designer = new Designer({
       name,
-      mob,
+      mob:parseInt(mob),
       email,
       profile_pic,
       address,
-      location: { type: "Point", coordinates },
+      location: location ? { type: "Point", coordinates: coordinat } : null,
       categories,
       services,
       subservices,
       Bio,
-      password: hashpassword,
-      term_cond,
+      password: hashpassword
     });
 
     await designer.save();
@@ -148,55 +88,49 @@ const signup = async (req, res) => {
   }
 };
 
+const getCategories = async(req,res)=>{
+  try{
+    const result = await Product.find();
+    return res.status(200).send(result);
+  }catch(error){
+    return res.status(500).send(error.message);
+  }
+}
+
+
 //for login
 const signin = async (req, res) => {
   const { email, password } = req.body;
   try {
-    //validat email format ex: @gamil.com
-    let checkEmail = isValidEmail(email);
-    if (!checkEmail) {
-      return res.status(400).json({ message: "Invalid email address" });
-    }
-
+    
     const designer = await Designer.findOne({ email });
-    if (designer) {
-      //validate password rajx
-      let reso = isValidPassword(password);
-      if (!reso) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
-          });
-      }
-      const passwordMatch = await bcrypt.compare(password, designer.password);
+    if(!designer){
+      return res.status(401).send({ status: "failed", message: "This email is not registered" });
+    }
+  
+    const passwordMatch = await bcrypt.compare(password, designer.password);
 
-      if (designer.email === email && passwordMatch) {
-        const token = jwt.sign({ designerId: designer._id }, secretkey, {
-          expiresIn: "60m",
-        });
+    if (designer.email === email && passwordMatch) {
+      const token = jwt.sign({ designerId: designer._id }, secretkey, {
+        expiresIn: "60m",
+      });
 
-        return res.status(200).send({
-          status: "success",
-          message: "login successful",
-          token: token,
-        });
-      } else {
+      return res.status(200).send({
+        status: "success",
+        message: "login successful",
+        token: token,
+      });
+    } else {
         return res
           .status(402)
           .send({ status: "failed", message: "your password is incorrect" });
       }
-    } else {
-      return res
-        .status(401)
-        .send({ status: "failed", message: "This email is not registered" });
-    }
   } catch (error) {
     return res.status(500).send(error.message);
   }
 };
 
+/*
 //link send to gmail for reset password
 const sendlinkresetPassword = async (req, res) => {
   const { email } = req.body;
@@ -326,6 +260,9 @@ const addServices = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+
+
 
 const deleteService = async (req, res) => {
   const { serviceId } = req.body;
@@ -580,5 +517,10 @@ const sendNotification = async (req, res) => {
 };
 
 module.exports = {signup,sendotp,signin,sendlinkresetPassword,resetpassword,changePassword,addServices,deleteService,getAllServices,
-  addProduct,delProduct,getAllProduct,addSubService,delSubService,getAllSubService,updateBio,latestOrder,updateOrderStatus,previousOrder,sendNotification,
+  addProduct,delProduct,getAllProduct,addSubService,delSubService,getAllSubService,updateBio,latestOrder,
+  updateOrderStatus,previousOrder,sendNotification,getCategories
 };
+
+*/
+
+module.exports = {sendotp, signup, getCategories,signin}

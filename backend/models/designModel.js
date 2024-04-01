@@ -1,60 +1,51 @@
 const mongoose = require('mongoose');
-const Product = require('./productCategoryModel');
-const Services = require('./serviceModel');
-const subService = require('./subService');
 
 const designerSchema = new mongoose.Schema({
     name:{
         type:String,
-        required:true
+        default:null
     },
     mob:{
         type:Number,
-        required:true
+        default:null
+        
     },
     email:{
         type:String,
-        required:true
+        default:null
     },
     profile_pic:{
         type:String,
-        required:true
+        default:null
     },
     address:{
         type:String,
-        required:true
+        default:null
     },
     location:{
-        type:{type:String,require:true},
+        type:{type:String,default:null},
         coordinates:[]
     },
-    categories:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:Product,
-        required:true
-    }],
-    services:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:Services,
-        required:true
-    }],
-    subservices:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:subService,
-        required:true
-    }],
+    categories:{
+        type:Array,
+        default:[]
+    },
+    services:{
+        type:Array,
+        default:[]
+    },
+    subservices:{
+        type:Array,
+        default:[]
+    },
     Bio:{
         type:String,
-        required:true
+        default:null
     },
     password:{
         type:String,
-        required:true
-    },
-    term_cond:{
-        type:Boolean,
-        required:true
-    },
+        default:null
+    }
 
 },
 {timestamps:true});

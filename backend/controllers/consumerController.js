@@ -1,6 +1,6 @@
 const Consumer = require('../models/consumerModel');
 const consProduct = require('../models/productModel');
-const productCategory = require('../models/productCategoryModel')
+const productCategory = require('../models/categoriesModel');
 const  { ObjectId }  = require('mongoose').Types;
 
 const bcrypt = require('bcrypt');

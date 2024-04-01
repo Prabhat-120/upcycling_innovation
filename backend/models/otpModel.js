@@ -12,7 +12,7 @@ const OtpSchema = new mongoose.Schema({
     expiresAt:{
         type:Date,
         required:true,
-        default: () => new Date(+new Date() + 2 * 60 * 1000)
+        default: () => new Date(+new Date() + 4 * 60 * 1000)
     }
     
 });
