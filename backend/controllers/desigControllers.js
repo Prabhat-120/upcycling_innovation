@@ -187,7 +187,7 @@ const verifyOtpResetPass = async(req,res) =>{
       return res.status(401).send({"status":"false","message":"OTP expired"});
     }
 
-    await OTP.deleteOne({ email, otp });
+    //await OTP.deleteOne({ email, otp });
     return res.status(200).send({"status":"true","message":"OTP verified successfully"});
   } catch (error) {
     return res.status(500).send(error.message);
@@ -213,21 +213,19 @@ const resetpassword = async (req, res) => {
       if (checkPreviousPass) {
         return res
           .status(406)
-          .send(
-            "enter a new password. your password are same with previous password"
-          );
+          .send({status:"false", message:"enter a new password. your password are same with previous password"});
       } else {
         const hashPassword = await bcrypt.hash(password, 10);
         await Designer.findByIdAndUpdate(designer._id, {
           $set: { password: hashPassword },
         });
         return res.status(200).send({
-          status: "success",
+          status: "true",
           message: "your password successfull reset",
         });
       }
     } else {
-      return res.status(401).send("password and conf_password are not matched");
+      return res.status(401).send({status:"false",message:"password and conf_password are not matched"});
     }
   } catch (error) {
     return res.status(500).send(error.message);
