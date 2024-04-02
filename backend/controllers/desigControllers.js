@@ -155,14 +155,14 @@ const sendlinkresetPassword = async (req, res) => {
       return res
         .status(200)
         .send({
-          status: "success",
+          status: "true",
           message: "reset password otp share with your gmail account",
         });
     } else {
       return res
         .status(406)
         .send({
-          status: "failed",
+          status: "false",
           message: "enter your registered gmail account",
         });
     }
@@ -179,16 +179,16 @@ const verifyOtpResetPass = async(req,res) =>{
     const otpDocument = await OTP.findOne({ email, otp });
 
     if (!otpDocument) {
-      return res.status(404).send("OTP not found or expired");
+      return res.status(404).send({"status":"false","message":"OTP not found or expired"});
     }
 
     // Check if the OTP has expired
     if (otpDocument.expiresAt < new Date()) {
-      return res.status(401).send("OTP expired");
+      return res.status(401).send({"status":"false","message":"OTP expired"});
     }
 
     await OTP.deleteOne({ email, otp });
-    return res.status(200).send("OTP verified successfully");
+    return res.status(200).send({"status":"true","message":"OTP verified successfully"});
   } catch (error) {
     return res.status(500).send(error.message);
   }
