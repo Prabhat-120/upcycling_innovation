@@ -14,9 +14,7 @@ const sendotp = async (req, res) => {
   const { email } = req.body;
   try {
     if (!email) {
-      return res
-        .status(400)
-        .send({ status: "failed", message: "Email is required." });
+      return res.status(400).send({ status: "failed", message: "Email is required." });
     }
     const newotp = new OTP({
       otp: genotp(),
@@ -130,26 +128,35 @@ const signin = async (req, res) => {
   }
 };
 
-/*
+
 //link send to gmail for reset password
 const sendlinkresetPassword = async (req, res) => {
   const { email } = req.body;
   try {
     const designer = await Designer.findOne({ email });
     if (designer) {
-      const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
-      console.log(link);
+     // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
+    // console.log(link);
+
+      const newotp = new OTP({
+        otp: genotp(),
+        email,
+      });
+      await newotp.save();
+
       const info = await transporter.sendMail({
         from: "prabhatpanigrahi120@gmail.com",
         to: designer.email,
         subject: "login-password reset",
-        html: `<a href=${link}>Click here</a> to Reset your password`,
+    //    html: `<a href=${link}>Click here</a> to Reset your password`,
+        html:`<h1>Please confirm your OTP</h1>
+        <p>Here is your OTP code: ${newotp.otp}</p>`,
       });
       return res
         .status(200)
         .send({
           status: "success",
-          message: "reset password link share with your gmail account",
+          message: "reset password otp share with your gmail account",
         });
     } else {
       return res
@@ -160,23 +167,49 @@ const sendlinkresetPassword = async (req, res) => {
         });
     }
   } catch (error) {
-    return res.send(error.message);
+    return res.status(500).send(error.message);
+  }
+};
+
+//verify otp for resetpassword
+const verifyOtpResetPass = async(req,res) =>{
+  const { otp, email } = req.body;
+  try {
+    // Find the OTP document by email and OTP value
+    const otpDocument = await OTP.findOne({ email, otp });
+
+    if (!otpDocument) {
+      return res.status(404).send("OTP not found or expired");
+    }
+
+    // Check if the OTP has expired
+    if (otpDocument.expiresAt < new Date()) {
+      return res.status(401).send("OTP expired");
+    }
+
+    await OTP.deleteOne({ email, otp });
+    return res.status(200).send("OTP verified successfully");
+  } catch (error) {
+    return res.status(500).send(error.message);
   }
 };
 
 //reset the password
 const resetpassword = async (req, res) => {
-  const { password, conf_password } = req.body;
-  const { id } = req.params;
+  const { email, password, conf_password } = req.body;
+ // const { id } = req.params;
 
   try {
     if (password === conf_password) {
-      const designer = await Designer.findById(id);
+     // const designer = await Designer.findOne(id);
+      
+      const designer = await Designer.findOne({email});
       const previousPassword = designer.password;
       const checkPreviousPass = await bcrypt.compare(
         password,
         previousPassword
       );
+
       if (checkPreviousPass) {
         return res
           .status(406)
@@ -185,7 +218,7 @@ const resetpassword = async (req, res) => {
           );
       } else {
         const hashPassword = await bcrypt.hash(password, 10);
-        await Designer.findByIdAndUpdate(designer.id, {
+        await Designer.findByIdAndUpdate(designer._id, {
           $set: { password: hashPassword },
         });
         return res.status(200).send({
@@ -200,6 +233,9 @@ const resetpassword = async (req, res) => {
     return res.status(500).send(error.message);
   }
 };
+
+
+/*
 
 //for change password
 const changePassword = async (req, res) => {
@@ -523,4 +559,4 @@ module.exports = {signup,sendotp,signin,sendlinkresetPassword,resetpassword,chan
 
 */
 
-module.exports = {sendotp, signup, getCategories,signin}
+module.exports = {sendotp, signup, getCategories, signin, sendlinkresetPassword,verifyOtpResetPass, resetpassword}
