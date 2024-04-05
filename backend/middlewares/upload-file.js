@@ -18,12 +18,13 @@ const uploadFile = (req, res, next) => {
 
     upload_file(req, res, async (err) => {
         // console.log(req.file);
+        console.log("first")
         if (!req.file) {
-            return res.status(400).send({
+            return res.status(403).send({
                 error: { message: "Select image" }
             })
         } else if (err) {
-            return res.status(400).send({
+            return res.status(403).send({
                 error: { message: "Image not uploaded" }
             })
 
