@@ -36,6 +36,8 @@ router.post('/designer/sendNotification',auth,designController.sendNotification)
 router.post('/designer/upload-image',uploadFile);
 
 router.get('/designer/getCategories',designController.getCategories);
+router.get('/designer/getServices',designController.getService);
+router.get('/designer/getSubServices',designController.getSubService);
 
 
 
