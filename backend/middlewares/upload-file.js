@@ -20,7 +20,7 @@ const uploadFile = (req, res, next) => {
         // console.log(req.file);
         console.log("first")
         if (!req.file) {
-            return res.status(403).send({
+            return res.status(401).send({
                 error: { message: "Select image" }
             })
         } else if (err) {
