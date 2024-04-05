@@ -18,8 +18,8 @@ router.post('/admin/filterDesignerName', adminController.getDesignerWithName);
 router.post('/admin/filterOrderDate', adminController.totalorder);
 router.post('/admin/getAllDesigner',adminController.addDesigner);
 
-router.post('/admin/addCategory', upload.single('productPic'), adminController.addProduct);
-router.post('/admin/editCategory/:id', upload.single('productPic'), adminController.editProduct);
+router.post('/admin/addCategory', uploadFile, adminController.addProduct);
+router.post('/admin/editCategory/:id', uploadFile, adminController.editProduct);
 router.post('/admin/delCategory/:id', adminController.delProduct);
 
 
