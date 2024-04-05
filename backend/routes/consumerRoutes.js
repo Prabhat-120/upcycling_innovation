@@ -2,23 +2,11 @@ const router = require('express').Router();
 const consumerController = require('../controllers/consumerController');
 const reqFieldMiddleware= require('../middlewares/requireField');
 const auth = require('../middlewares/auth-middleware').checkConsumerAuth;
-
-const multer = require('multer');
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination:(req,file,cb)=>{
-      cb(null, "uploads/");
-    },
-    filename:(req,file,cb)=>{
-      cb(null,file.fieldname + '-' + Date.now() +path.extname(file.originalname));
-    }
-});
-const upload = multer({storage: storage});
+const uploadFile = require('../middlewares/upload-file');
 
 
 router.post('/consumer/otpsend', reqFieldMiddleware, consumerController.sendotp);
-router.post('/consumer/register', reqFieldMiddleware, upload.single('images'), consumerController.signup);
+router.post('/consumer/register',  uploadFile , consumerController.signup);
 router.post('/consumer/login', reqFieldMiddleware, consumerController.signin);
 
 router.post('/consumer/slfrp', reqFieldMiddleware, consumerController.sendLinkResetPassword);

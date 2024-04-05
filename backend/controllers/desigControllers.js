@@ -4,9 +4,9 @@ const jwt = require("jsonwebtoken");
 const genotp = require("../services/OtpServices");
 const transporter = require("../Config/mailconfig");
 const OTP = require("../models/otpModel");
-//const Order = require("../models/orderModel");
 const Product = require("../models/categoriesModel");
-//const Services = require("../models/serviceModel");
+const Services = require("../models/serviceModel");
+const SubService = require("../models/subService");
 const secretkey = process.env.SECRETKEY;
 
 //for send otp to gmail verify and register the designer account
@@ -93,7 +93,25 @@ const getCategories = async(req,res)=>{
   }catch(error){
     return res.status(500).send(error.message);
   }
-}
+};
+
+const getService = async (req,res)=>{
+  try{
+    const result = await Services.find();
+    return res.status(200).send(result);
+  }catch(error){
+    return res.status(500).send(error.message);
+  }
+};
+
+const getSubService = async (req,res)=>{
+  try{
+    const result = await SubService.find();
+    return res.status(200).send(result);
+  }catch(error){
+    return res.status(500).send(error.message);
+  }
+};
 
 
 //for login
@@ -103,7 +121,7 @@ const signin = async (req, res) => {
     
     const designer = await Designer.findOne({ email });
     if(!designer){
-      return res.status(401).send({ status: "failed", message: "This email is not registered" });
+      return res.status(401).send({ status: "false", message: "This email is not registered" });
     }
   
     const passwordMatch = await bcrypt.compare(password, designer.password);
@@ -121,7 +139,7 @@ const signin = async (req, res) => {
     } else {
         return res
           .status(402)
-          .send({ status: "failed", message: "your password is incorrect" });
+          .send({ status: "false", message: "your password is incorrect" });
       }
   } catch (error) {
     return res.status(500).send(error.message);
@@ -135,7 +153,7 @@ const sendlinkresetPassword = async (req, res) => {
   try {
     const designer = await Designer.findOne({ email });
     if (designer) {
-     // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
+    // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
     // console.log(link);
 
       const newotp = new OTP({
@@ -148,7 +166,7 @@ const sendlinkresetPassword = async (req, res) => {
         from: "prabhatpanigrahi120@gmail.com",
         to: designer.email,
         subject: "login-password reset",
-    //    html: `<a href=${link}>Click here</a> to Reset your password`,
+      //  html: `<a href=${link}>Click here</a> to Reset your password`,
         html:`<h1>Please confirm your OTP</h1>
         <p>Here is your OTP code: ${newotp.otp}</p>`,
       });
@@ -224,6 +242,7 @@ const resetpassword = async (req, res) => {
           message: "your password successfull reset",
         });
       }
+
     } else {
       return res.status(401).send({status:"false",message:"password and conf_password are not matched"});
     }
@@ -233,7 +252,7 @@ const resetpassword = async (req, res) => {
 };
 
 
-/*
+
 
 //for change password
 const changePassword = async (req, res) => {
@@ -550,11 +569,7 @@ const sendNotification = async (req, res) => {
   }
 };
 
-module.exports = {signup,sendotp,signin,sendlinkresetPassword,resetpassword,changePassword,addServices,deleteService,getAllServices,
+module.exports = {signup,sendotp, getCategories, getService, getSubService, signin,sendlinkresetPassword,verifyOtpResetPass, resetpassword,changePassword,addServices,deleteService,getAllServices,
   addProduct,delProduct,getAllProduct,addSubService,delSubService,getAllSubService,updateBio,latestOrder,
   updateOrderStatus,previousOrder,sendNotification,getCategories
 };
-
-*/
-
-module.exports = {sendotp, signup, getCategories, signin, sendlinkresetPassword,verifyOtpResetPass, resetpassword}

@@ -44,10 +44,11 @@ const sendotp = async (req, res) => {
   
 //register consumer
 const signup = async (req, res) => {
-    const {firstName, lastName, email, mob, images, DOB, Gender, password, conf_password, term_cond, otp} = req.body;
+    const {firstName, lastName, email, mob,  DOB, Gender, password, conf_password, term_cond, otp} = req.body;
+    profile_pic =  req.file.filename;
 
     try {
-        if (!firstName || !lastName || !email || !mob  || !images || !DOB || !Gender || !password || !conf_password || !term_cond || !otp){
+        if (!firstName || !lastName || !email || !mob  || !profile_pic || !DOB || !Gender || !password || !conf_password || !term_cond || !otp){
             return res.status(401).send("all fields are required");
         };
         console.log(req.body)
@@ -69,7 +70,7 @@ const signup = async (req, res) => {
                         name:fullname,
                         email,
                         mob,
-                        images,
+                        profile_pic,
                         DOB,
                         Gender,
                         password: hashpassword,

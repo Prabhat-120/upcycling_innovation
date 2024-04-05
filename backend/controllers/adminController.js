@@ -156,7 +156,7 @@ const getAllConsumer = async (req,res)=>{
     try {
         const allconsumer = await Consumer.find({});
         const total = allconsumer.length;
-        res.status(200).send({"status":"success", "message":"total consumer register", "totalConsumer":total})
+        res.status(200).send({"status":"true", "message":"total consumer register", "totalConsumer":total})
     } catch (error) {
         console.error(error)
         res.status(500).send("internal server error");
@@ -168,7 +168,7 @@ const filterConsumerWithDate = async(req,res) =>{
 
     const { startdate, enddate } =req.body;
     if(!startdate || !enddate){
-        return res.status(401).json({ "status":"failed", "message":"all field is required" })
+        return res.status(401).json({ "status":"false", "message":"all field is required" })
     };
 
     try{
@@ -181,7 +181,7 @@ const filterConsumerWithDate = async(req,res) =>{
         );
 
         if(consumer.length === 0){
-            return res.status(201).json({"status":"success","message":"no consumer can registered between this Date"});
+            return res.status(201).json({"status":"true","message":"no consumer can registered between this Date"});
         };
 
         res.status(201).send(consumer)
@@ -195,12 +195,12 @@ const filterConsumerWithDate = async(req,res) =>{
 const filterConsumerWithName = async(req,res)=>{
     const { name } = req.body
     if(!name){
-        return res.status(401).json({"status":"failed","message":"field is required"})
+        return res.status(401).json({"status":"false","message":"field is required"})
     };
     try{
         const consumer = await Consumer.find({name:name});
         if(consumer.length === 0){
-            return res.status(201).json({"status":"success","message":"this name not match with an consumer"});
+            return res.status(201).json({"status":"true","message":"this name not match with an consumer"});
         }
         res.status(201).send(consumer);
     }catch(error){
@@ -211,39 +211,55 @@ const filterConsumerWithName = async(req,res)=>{
 
 //admin add designer
 const addDesigner = async (req,res) =>{
+    try{
     const { name, mob, email, address, location, categories, services, subservices, Bio, password, conf_password, term_cond, otp} = req.body;
     const profile_pic = req.file.filename;
 
     if( !name || !mob || !email || !profile_pic || !address || !categories || !services || !subservices || !Bio || !password ||
          !conf_password || !term_cond || !otp || !location){
-        return res.send("all field are required");
+        return res.status(404).send({status:"false",message:"all field are required"});
     }
-    try{
-        const designer = new Designer({
-            name, 
-            mob, 
-            email, 
-            profile_pic, 
-            address,
-            location: { type: 'Point', coordinates }, 
-            categories, 
-            services, 
-            subservices, 
-            Bio, 
-            password:hashpassword, 
-            term_cond 
-        });
 
-        const checkDesigner = await Designer.find({email});
-        if(checkDesigner){
-            return res.status(401).jason({status:"failed", message:"this email is already registered for designer account"});
-        }
-        await designer.save();
-        return res.status(200).send("designer successfully added..");
-    }catch(error){
-        return res.status(401).send(error.message);
+    const existDesigner = await Designer.findOne({ email });
+    if (existDesigner) {
+      return res.status(409).json({ status: "false", message: "Email already exists" });
     }
-}
+
+    const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
+
+    if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
+      return res.status(401).json({ status:"false", message: "Invalid or expired OTP" });
+    }
+
+    const hashpassword = await bcrypt.hash(password, 10);
+
+    let coordinat = null;
+    if (location) {
+      coordinat = location.split(",").map(coord => parseFloat(coord.trim()));
+    }
+
+    const designer = new Designer({
+      name,
+      mob:parseInt(mob),
+      email,
+      profile_pic,
+      address,
+      location: location ? { type: "Point", coordinates: coordinat } : null,
+      categories,
+      services,
+      subservices,
+      Bio,
+      password: hashpassword
+    });
+
+    await designer.save();
+    await OTP.deleteOne({ otp });
+
+    return res.status(200).json({ message: "Successfully registered" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 //admin edit designer
 //admin delete designer
@@ -254,7 +270,7 @@ const totalorder = async(req,res)=>{
     const { startDate, endDate } = req.body;
     
     if(!startDate || !endDate){
-        return res.status(401).json({"status":"failed","message":"all field is required"});
+        return res.status(401).json({"status":"false","message":"all field is required"});
     }
 
     const start = new Date(startDate);

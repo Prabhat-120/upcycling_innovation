@@ -1,24 +1,10 @@
 const router = require('express').Router();
 const adminController = require('../controllers/adminController');
 
-const multer = require('multer');
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination:(req,file,cb)=>{
-      cb(null, "uploads/");
-    },
-    filename:(req,file,cb)=>{
-      cb(null,file.fieldname + '-' + Date.now() +path.extname(file.originalname));
-    }
-  });
-    
-const upload = multer({
-    storage: storage
-});
+const uploadFile = require('../middlewares/upload-file');
 
 router.post('/admin/sendotp',adminController.sendotp);
-router.post('/admin/signup',upload.single('images'), adminController.signUp);
+router.post('/admin/signup',uploadFile, adminController.signUp);
 router.post('/admin/login',adminController.login);
   
 router.get('/admin/getAllConsumer', adminController.getAllConsumer);
