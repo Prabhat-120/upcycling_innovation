@@ -53,13 +53,13 @@ const signup = async (req, res) => {
     const existDesigner = await Designer.findOne({ email });
 
     if (existDesigner) {
-      return res.status(409).json({ status: "Failed", message: "Email already exists" });
+      return res.status(409).json({ status: "false", message: "Email already exists" });
     }
 
     const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
 
     if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
-      return res.status(401).json({ message: "Invalid or expired OTP" });
+      return res.status(401).json({ status:"false", message: "Invalid or expired OTP" });
     }
 
     const hashpassword = await bcrypt.hash(password, 10);
@@ -91,7 +91,7 @@ const signup = async (req, res) => {
     await designer.save();
     await OTP.deleteOne({ otp });
 
-    return res.status(200).json({ message: "Successfully registered" });
+    return res.status(200).json({status:"true", message: "Successfully registered" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -144,7 +144,7 @@ const signin = async (req, res) => {
       });
 
       return res.status(200).send({
-        status: "success",
+        status: "true",
         message: "login successful",
         token: token,
       });
