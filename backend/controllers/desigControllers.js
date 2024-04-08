@@ -8,6 +8,7 @@ const Product = require("../models/categoriesModel");
 const Services = require("../models/serviceModel");
 const SubService = require("../models/subService");
 const secretkey = process.env.SECRETKEY;
+const mongoose = require('mongoose');
 
 //for send otp to gmail verify and register the designer account
 const sendotp = async (req, res) => {
@@ -45,7 +46,12 @@ const signup = async (req, res) => {
     console.log(req.body);
     console.log(profile_pic);
 
+    const cate = JSON.parse(categories);
+    const serv = JSON.parse(services);
+    const subserv = JSON.parse(subservices);
+
     const existDesigner = await Designer.findOne({ email });
+
     if (existDesigner) {
       return res.status(409).json({ status: "Failed", message: "Email already exists" });
     }
@@ -63,16 +69,21 @@ const signup = async (req, res) => {
       coordinat = location.split(",").map(coord => parseFloat(coord.trim()));
     }
 
+    // Mapping categories, services, and subservices to get array of ObjectIds
+    const categoriesArray = cate.map(item => new mongoose.Types.ObjectId(item.value));
+    const servicesArray = serv.map(item => new mongoose.Types.ObjectId(item.value));
+    const subservicesArray = subserv.map(item => new mongoose.Types.ObjectId(item.value));
+
     const designer = new Designer({
       name,
-      mob:parseInt(mob),
+      mob: parseInt(mob),
       email,
       profile_pic,
       address,
       location: location ? { type: "Point", coordinates: coordinat } : null,
-      categories,
-      services,
-      subservices,
+      categories: categoriesArray,
+      services: servicesArray,
+      subservices: subservicesArray,
       Bio,
       password: hashpassword
     });
@@ -85,6 +96,7 @@ const signup = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 const getCategories = async(req,res)=>{
   try{
@@ -415,7 +427,7 @@ const getAllProduct = async (req, res) => {
 const addSubService = async (req, res) => {
   const { subServicesId } = req.body;
   try {
-    const subSer = await subService.findById(subServicesId);
+    const subSer = await SubService.findById(subServicesId);
     if(!subSer){
       return res.status(400).json({ message: "Sub Service Not Found..!!" });
     }

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+
 const designerSchema = new mongoose.Schema({
     name:{
         type:String,
@@ -26,18 +27,18 @@ const designerSchema = new mongoose.Schema({
         type:{type:String,default:null},
         coordinates:[]
     },
-    categories:{
-        type:Array,
-        default:[]
-    },
-    services:{
-        type:Array,
-        default:[]
-    },
-    subservices:{
-        type:Array,
-        default:[]
-    },
+    categories:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    }],
+    services:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Services'
+    }],
+    subservices:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'subService'
+    }],
     Bio:{
         type:String,
         default:null
