@@ -523,7 +523,7 @@ const latestOrder = async (req, res) => {
 
     return res
       .status(201)
-      .json({ status: "success", message: "all latest order", data: result });
+      .send(result);
   } catch (error) {
     return res.status(401).send(error.message);
   }
