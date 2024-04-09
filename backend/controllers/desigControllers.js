@@ -554,7 +554,7 @@ const previousOrder = async (req, res) => {
         { tailorId: req.designer._id },
         { status: { $in: ["completed", "processing", "canceled"] } },
       ],
-    });
+    }).populate('consumerId');
     if (orders.length === 0) {
       return res.status(202).send("does not have any previous order");
     }
