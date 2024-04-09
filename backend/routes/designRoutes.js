@@ -33,7 +33,7 @@ router.post('/designer/updateStatus',reqFieldMiddleware, auth, designController.
 router.get('/designer/previousOrder', auth, designController.previousOrder);
 
 router.post('/designer/sendNotification',auth,designController.sendNotification);
-router.post('/designer/upload-image',uploadFile);
+//router.post('/designer/getimage',)
 
 router.get('/designer/getCategories',designController.getCategories);
 router.get('/designer/getServices',designController.getService);
