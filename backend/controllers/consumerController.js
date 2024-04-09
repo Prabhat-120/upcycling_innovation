@@ -52,7 +52,9 @@ const signup = async (req, res) => {
             return res.status(401).send("all fields are required");
         };
         console.log(req.body)
+
         const variotp = await OTP.findOne({ otp });
+
         if (!variotp) {
             return res.status(404).send("Your OTP is incorrect");
         }
@@ -70,7 +72,7 @@ const signup = async (req, res) => {
                         name:fullname,
                         email,
                         mob,
-                        profile_pic,
+                        images:profile_pic,
                         DOB,
                         Gender,
                         password: hashpassword,
@@ -124,6 +126,7 @@ const signin = async (req,res)=>{
 const sendLinkResetPassword = async(req,res)=>{
     const {email} = req.body;
     try{
+        console.log(req.body);
         const consumer = await Consumer.findOne({email});
         if(consumer){
     
@@ -136,7 +139,6 @@ const sendLinkResetPassword = async(req,res)=>{
                 subject:"login-password reset",
                 html:`<a href=${link}>Click here</a>to Reset your password` 
             });
-    
             res.status(200).send({"status":"success", "message":"reset password link share with your gmail account"})
         }else{
             res.status(406).send({"status":"failed", "message":"enter your registered gmail account"})

@@ -9,6 +9,7 @@ const Services = require("../models/serviceModel");
 const SubService = require("../models/subService");
 const secretkey = process.env.SECRETKEY;
 const mongoose = require('mongoose');
+const Order = require('../models/orderModel');
 
 //for send otp to gmail verify and register the designer account
 const sendotp = async (req, res) => {
@@ -495,13 +496,26 @@ const updateBio = async (req, res) => {
   }
 };
 
+const getDesigner = async (req,res) =>{
+  try{
+    const result = await Designer.findById(req.designer._id);
+    return res.status(200).send(result);
+
+  }catch(error){
+    return res.status(500).json({status:"false", message:error.message});
+  }
+}
+
+
+
+
 //find order order list
 const latestOrder = async (req, res) => {
   try {
     const result = await Order.find({
       tailorId: req.designer._id,
       status: "pending",
-    });
+    }).populate("consumerId");
 
     if (result.length === 0) {
       return res.send("tailor does not have latest order");
@@ -581,7 +595,7 @@ const sendNotification = async (req, res) => {
   }
 };
 
-module.exports = {signup,sendotp, getCategories, getService, getSubService, signin,sendlinkresetPassword,verifyOtpResetPass, resetpassword,changePassword,addServices,deleteService,getAllServices,
+module.exports = {signup,sendotp, getCategories, getService, getSubService, signin,sendlinkresetPassword,verifyOtpResetPass, resetpassword,getDesigner,changePassword,addServices,deleteService,getAllServices,
   addProduct,delProduct,getAllProduct,addSubService,delSubService,getAllSubService,updateBio,latestOrder,
   updateOrderStatus,previousOrder,sendNotification,getCategories
 };

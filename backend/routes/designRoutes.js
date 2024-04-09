@@ -13,6 +13,7 @@ router.post('/designer/slfrp', reqFieldMiddleware, designController.sendlinkrese
 router.post('/designer/verifyOtp', reqFieldMiddleware, designController.verifyOtpResetPass);
 //router.post('/designer/resetpass/:id',reqFieldMiddleware,designController.resetpassword);
 router.post('/designer/resetpass',reqFieldMiddleware,designController.resetpassword);
+router.get('/designer/getDesigner',auth,designController.getDesigner);
 router.post('/designer/changePass',reqFieldMiddleware, auth, designController.changePassword);
 
 router.post('/designer/myprofile/addservices', reqFieldMiddleware, auth, designController.addServices);
