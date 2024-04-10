@@ -516,7 +516,7 @@ const latestOrder = async (req, res) => {
     }).populate("consumerId");
 
     if (result.length === 0) {
-      return res.send({ message: "tailor does not have latest order", data: result });
+      return res.send({ message: "tailor does not have latest order", status: "empty" });
     }
 
     return res
@@ -561,7 +561,7 @@ const previousOrder = async (req, res) => {
       ],
     }).populate('consumerId');
     if (orders.length === 0) {
-      return res.status(202).send("does not have any previous order");
+      return res.status(202).send({ message: "does not have any previous order", status: "empty" });
     }
 
     return res.status(201).send(orders);
