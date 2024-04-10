@@ -1,0 +1,42 @@
+body {
+    background-color: #FFF7F0;
+}
+
+.verify-otp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+}
+
+.extext{
+    font-family: 'Times New Roman', Times, serif;
+    font-size: small;
+    float: left;
+    color: #5E8562;
+}
+
+.verify-otp-container > img {
+    width: 250px;
+    margin-top: 10px;
+    margin-bottom: -10px;
+    mix-blend-mode: multiply;
+}
+.form-container {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    border: none;
+}
+
+.verify-button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 25px;
+    background-color: #1B4C20;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}

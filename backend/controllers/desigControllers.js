@@ -43,7 +43,7 @@ const signup = async (req, res) => {
   try {
     const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
     const profile_pic = req.file.filename;
-    
+
     console.log(req.body);
     console.log(profile_pic);
 
@@ -60,7 +60,7 @@ const signup = async (req, res) => {
     const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
 
     if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
-      return res.status(401).json({ status:"false", message: "Invalid or expired OTP" });
+      return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
     }
 
     const hashpassword = await bcrypt.hash(password, 10);
@@ -92,36 +92,36 @@ const signup = async (req, res) => {
     await designer.save();
     await OTP.deleteOne({ otp });
 
-    return res.status(200).json({status:"true", message: "Successfully registered" });
+    return res.status(200).json({ status: "true", message: "Successfully registered" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
 
-const getCategories = async(req,res)=>{
-  try{
+const getCategories = async (req, res) => {
+  try {
     const result = await Product.find();
     return res.status(200).send(result);
-  }catch(error){
+  } catch (error) {
     return res.status(500).send(error.message);
   }
 };
 
-const getService = async (req,res)=>{
-  try{
+const getService = async (req, res) => {
+  try {
     const result = await Services.find();
     return res.status(200).send(result);
-  }catch(error){
+  } catch (error) {
     return res.status(500).send(error.message);
   }
 };
 
-const getSubService = async (req,res)=>{
-  try{
+const getSubService = async (req, res) => {
+  try {
     const result = await SubService.find();
     return res.status(200).send(result);
-  }catch(error){
+  } catch (error) {
     return res.status(500).send(error.message);
   }
 };
@@ -131,12 +131,12 @@ const getSubService = async (req,res)=>{
 const signin = async (req, res) => {
   const { email, password } = req.body;
   try {
-    
+
     const designer = await Designer.findOne({ email });
-    if(!designer){
+    if (!designer) {
       return res.status(401).send({ status: "false", message: "This email is not registered" });
     }
-  
+
     const passwordMatch = await bcrypt.compare(password, designer.password);
 
     if (designer.email === email && passwordMatch) {
@@ -150,10 +150,10 @@ const signin = async (req, res) => {
         token: token,
       });
     } else {
-        return res
-          .status(402)
-          .send({ status: "false", message: "your password is incorrect" });
-      }
+      return res
+        .status(402)
+        .send({ status: "false", message: "your password is incorrect" });
+    }
   } catch (error) {
     return res.status(500).send(error.message);
   }
@@ -166,8 +166,8 @@ const sendlinkresetPassword = async (req, res) => {
   try {
     const designer = await Designer.findOne({ email });
     if (designer) {
-    // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
-    // console.log(link);
+      // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
+      // console.log(link);
 
       const newotp = new OTP({
         otp: genotp(),
@@ -179,8 +179,8 @@ const sendlinkresetPassword = async (req, res) => {
         from: "prabhatpanigrahi120@gmail.com",
         to: designer.email,
         subject: "login-password reset",
-      //  html: `<a href=${link}>Click here</a> to Reset your password`,
-        html:`<h1>Please confirm your OTP</h1>
+        //  html: `<a href=${link}>Click here</a> to Reset your password`,
+        html: `<h1>Please confirm your OTP</h1>
         <p>Here is your OTP code: ${newotp.otp}</p>`,
       });
       return res
@@ -203,23 +203,23 @@ const sendlinkresetPassword = async (req, res) => {
 };
 
 //verify otp for resetpassword
-const verifyOtpResetPass = async(req,res) =>{
+const verifyOtpResetPass = async (req, res) => {
   const { otp, email } = req.body;
   try {
     // Find the OTP document by email and OTP value
     const otpDocument = await OTP.findOne({ email, otp });
 
     if (!otpDocument) {
-      return res.status(404).send({"status":"false","message":"OTP not found or expired"});
+      return res.status(404).send({ "status": "false", "message": "OTP not found or expired" });
     }
 
     // Check if the OTP has expired
     if (otpDocument.expiresAt < new Date()) {
-      return res.status(401).send({"status":"false","message":"OTP expired"});
+      return res.status(401).send({ "status": "false", "message": "OTP expired" });
     }
 
     //await OTP.deleteOne({ email, otp });
-    return res.status(200).send({"status":"true","message":"OTP verified successfully"});
+    return res.status(200).send({ "status": "true", "message": "OTP verified successfully" });
   } catch (error) {
     return res.status(500).send(error.message);
   }
@@ -228,13 +228,13 @@ const verifyOtpResetPass = async(req,res) =>{
 //reset the password
 const resetpassword = async (req, res) => {
   const { email, password, conf_password } = req.body;
- // const { id } = req.params;
+  // const { id } = req.params;
 
   try {
     if (password === conf_password) {
-     // const designer = await Designer.findOne(id);
-      
-      const designer = await Designer.findOne({email});
+      // const designer = await Designer.findOne(id);
+
+      const designer = await Designer.findOne({ email });
       const previousPassword = designer.password;
       const checkPreviousPass = await bcrypt.compare(
         password,
@@ -244,7 +244,7 @@ const resetpassword = async (req, res) => {
       if (checkPreviousPass) {
         return res
           .status(406)
-          .send({status:"false", message:"enter a new password. your password are same with previous password"});
+          .send({ status: "false", message: "enter a new password. your password are same with previous password" });
       } else {
         const hashPassword = await bcrypt.hash(password, 10);
         await Designer.findByIdAndUpdate(designer._id, {
@@ -257,7 +257,7 @@ const resetpassword = async (req, res) => {
       }
 
     } else {
-      return res.status(401).send({status:"false",message:"password and conf_password are not matched"});
+      return res.status(401).send({ status: "false", message: "password and conf_password are not matched" });
     }
   } catch (error) {
     return res.status(500).send(error.message);
@@ -275,8 +275,8 @@ const changePassword = async (req, res) => {
   let reso = isValidPassword(newPassword);
   if (!reso) {
     return res.status(400).json({
-      message:"Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
-      });
+      message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
+    });
   }
 
   if (newPassword !== confPassword) {
@@ -286,13 +286,13 @@ const changePassword = async (req, res) => {
   try {
     const designer = await Designer.findById(req.designer._id);
     const prevPassword = designer.password;
-    const checkPreviousPass = await bcrypt.compare(newPassword,prevPassword);
+    const checkPreviousPass = await bcrypt.compare(newPassword, prevPassword);
 
     if (checkPreviousPass) {
       return res.status(400).send("enter a new password. your password are same with previous password");
     }
     const hashPassword = await bcrypt.hash(newPassword, 10);
-    await Designer.findByIdAndUpdate(req.designer._id, {$set: { password: hashPassword },});
+    await Designer.findByIdAndUpdate(req.designer._id, { $set: { password: hashPassword }, });
 
     return res.status(200).send("successfully change password");
 
@@ -307,7 +307,7 @@ const addServices = async (req, res) => {
   const { serviceId } = req.body;
   try {
     const ser = await Services.findById(serviceId);
-    if(!ser){
+    if (!ser) {
       return res.status(400).json({ message: "Service Not Found..!!" });
     }
 
@@ -315,7 +315,7 @@ const addServices = async (req, res) => {
 
     //check if service is alredy exits in the designer data
     const repo = designer.services.includes(serviceId);
-    if(repo){
+    if (repo) {
       return res.status(400).json({ message: "Service is alredy exist..!!" });
     }
 
@@ -338,7 +338,7 @@ const deleteService = async (req, res) => {
       return res.send("Designer not found");
     }
     const repo = designer.services.includes(serviceId);
-    if(!repo){
+    if (!repo) {
       return res.status(404).json({ message: "Service Not Found in the designer data..!!" });
     }
 
@@ -368,20 +368,18 @@ const addProduct = async (req, res) => {
   const { productId } = req.body;
   try {
     const prod = await Product.findById(productId);
-    if(!prod){
+    if (!prod) {
       return res.status(400).json({ message: "Prdouct Not Found..!!" });
     }
     const designer = await Designer.findById(req.designer._id);
     if (!designer) {
       return res.send("Designer not found");
     }
-
     //check if category is alredy exits in the designer data
     const repo = designer.categories.includes(productId);
-    if(repo){
+    if (repo) {
       return res.status(400).json({ message: "product_categorie is alredy exist..!!" });
     }
-
     designer.categories.push(productId);
     await designer.save();
     return res.status(201).json({ message: "product_categorie add successfully" });
@@ -398,7 +396,7 @@ const delProduct = async (req, res) => {
       return res.send("designer not found");
     }
     const repo = designer.categories.includes(productId);
-    if(!repo){
+    if (!repo) {
       return res.status(404).json({ message: "product_categorie Not Found in the designer data..!!" });
     }
     designer.categories.pull(productId);
@@ -429,7 +427,7 @@ const addSubService = async (req, res) => {
   const { subServicesId } = req.body;
   try {
     const subSer = await SubService.findById(subServicesId);
-    if(!subSer){
+    if (!subSer) {
       return res.status(400).json({ message: "Sub Service Not Found..!!" });
     }
     const designer = await Designer.findById(req.designer._id);
@@ -438,7 +436,7 @@ const addSubService = async (req, res) => {
     }
     //check if category is alredy exits in the designer data
     const repo = designer.subservices.includes(subServicesId);
-    if(repo){
+    if (repo) {
       return res.status(400).json({ message: "subService is alredy exist..!!" });
     }
     designer.subservices.push(subServicesId);
@@ -457,7 +455,7 @@ const delSubService = async (req, res) => {
       return res.send("Designer not found");
     }
     const repo = designer.subservices.includes(subServicesId);
-    if(!repo){
+    if (!repo) {
       return res.status(404).json({ message: "Sub Service Not Found in the designer data..!!" });
     }
     designer.subservices.pull(subServicesId);
@@ -496,13 +494,13 @@ const updateBio = async (req, res) => {
   }
 };
 
-const getDesigner = async (req,res) =>{
-  try{
+const getDesigner = async (req, res) => {
+  try {
     const result = await Designer.findById(req.designer._id);
     return res.status(200).send(result);
 
-  }catch(error){
-    return res.status(500).json({status:"false", message:error.message});
+  } catch (error) {
+    return res.status(500).json({ status: "false", message: error.message });
   }
 }
 
@@ -532,11 +530,18 @@ const latestOrder = async (req, res) => {
 //designer can update the order status
 const updateOrderStatus = async (req, res) => {
   try {
-    const { status, completeDate } = req.body;
+    const { orderId, status } = req.body;
+    const tailorId = req.designer._id;
+    
     const result = await Order.updateOne(
-      { tailorId: req.designer._id },
-      { $set: { status: status, orderCompleteDate: completeDate } }
+      { _id: orderId, tailorId: tailorId },
+      { $set: { status: status } }
     );
+
+    if (result.nModified === 0) {
+      return res.status(404).json({ message: "Order not found or unauthorized to update" });
+    }
+
     return res.send({
       message: "Your status was successfully updated.",
       data: result,
@@ -595,7 +600,8 @@ const sendNotification = async (req, res) => {
   }
 };
 
-module.exports = {signup,sendotp, getCategories, getService, getSubService, signin,sendlinkresetPassword,verifyOtpResetPass, resetpassword,getDesigner,changePassword,addServices,deleteService,getAllServices,
-  addProduct,delProduct,getAllProduct,addSubService,delSubService,getAllSubService,updateBio,latestOrder,
-  updateOrderStatus,previousOrder,sendNotification,getCategories
+module.exports = {
+  signup, sendotp, getCategories, getService, getSubService, signin, sendlinkresetPassword, verifyOtpResetPass, resetpassword, getDesigner, changePassword, addServices, deleteService, getAllServices,
+  addProduct, delProduct, getAllProduct, addSubService, delSubService, getAllSubService, updateBio, latestOrder,
+  updateOrderStatus, previousOrder, sendNotification, getCategories
 };
