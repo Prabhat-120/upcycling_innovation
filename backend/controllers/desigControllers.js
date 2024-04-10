@@ -516,7 +516,7 @@ const latestOrder = async (req, res) => {
     }).populate("consumerId");
 
     if (result.length === 0) {
-      return res.send("tailor does not have latest order");
+      return res.send({ message: "tailor does not have latest order", data: result });
     }
 
     return res
@@ -532,7 +532,7 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
     const tailorId = req.designer._id;
-    
+
     const result = await Order.updateOne(
       { _id: orderId, tailorId: tailorId },
       { $set: { status: status } }
