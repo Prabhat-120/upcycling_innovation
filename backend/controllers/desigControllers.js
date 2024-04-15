@@ -10,11 +10,20 @@ const SubService = require("../models/subService");
 const secretkey = process.env.SECRETKEY;
 const mongoose = require('mongoose');
 const Order = require('../models/orderModel');
+const { isValidPassword, isValidEmail } = require('../Validator/validator')
 
 //for send otp to gmail verify and register the designer account
 const sendotp = async (req, res) => {
   const { email } = req.body;
   try {
+    let validEmail = isValidEmail(email);
+    if (!validEmail) {
+      return res.status(400).json({
+        status: "false",
+        message: "please enter correct email patteren",
+      });
+    }
+
     if (!email) {
       return res.status(400).send({ status: "failed", message: "Email is required." });
     }
@@ -44,9 +53,6 @@ const signup = async (req, res) => {
     const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
     const profile_pic = req.file.filename;
 
-    console.log(req.body);
-    console.log(profile_pic);
-
     const cate = JSON.parse(categories);
     const serv = JSON.parse(services);
     const subserv = JSON.parse(subservices);
@@ -63,6 +69,13 @@ const signup = async (req, res) => {
       return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
     }
 
+    let validPassword = isValidPassword(password);
+    if (!validPassword) {
+      return res.status(400).json({
+        status: "false",
+        message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
+      });
+    }
     const hashpassword = await bcrypt.hash(password, 10);
 
     let coordinat = null;
@@ -132,27 +145,35 @@ const signin = async (req, res) => {
   const { email, password } = req.body;
   try {
 
+    let validEmail = isValidEmail(email);
+    if (!validEmail) {
+      return res.status(400).json({
+        status: "false",
+        message: "please enter correct email patteren",
+      });
+    }
+
+    let validPassword = isValidPassword(password);
+    if (!validPassword) {
+      return res.status(400).json({
+        status: "false",
+        message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
+      });
+    }
+
     const designer = await Designer.findOne({ email });
     if (!designer) {
       return res.status(401).send({ status: "false", message: "This email is not registered" });
-    }
-
+    };
     const passwordMatch = await bcrypt.compare(password, designer.password);
-
     if (designer.email === email && passwordMatch) {
-      const token = jwt.sign({ designerId: designer._id }, secretkey, {
-        expiresIn: "60m",
-      });
+      const token = jwt.sign({ designerId: designer._id }, secretkey, { expiresIn: "60m" });
+      designer.lastLogin = new Date();
+      await designer.save();
 
-      return res.status(200).send({
-        status: "true",
-        message: "login successful",
-        token: token,
-      });
+      return res.status(200).send({ status: "true", message: "login successful", token: token, });
     } else {
-      return res
-        .status(402)
-        .send({ status: "false", message: "your password is incorrect" });
+      return res.status(402).send({ status: "false", message: "your password is incorrect" });
     }
   } catch (error) {
     return res.status(500).send(error.message);
@@ -161,20 +182,25 @@ const signin = async (req, res) => {
 
 
 //link send to gmail for reset password
-const sendlinkresetPassword = async (req, res) => {
+const sendOtpForResetPass = async (req, res) => {
   const { email } = req.body;
   try {
+    let validEmail = isValidEmail(email);
+    if (!validEmail) {
+      return res.status(400).json({
+        status: "false",
+        message: "please enter correct email patteren",
+      });
+    }
     const designer = await Designer.findOne({ email });
     if (designer) {
       // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
       // console.log(link);
-
       const newotp = new OTP({
         otp: genotp(),
         email,
       });
       await newotp.save();
-
       const info = await transporter.sendMail({
         from: "prabhatpanigrahi120@gmail.com",
         to: designer.email,
@@ -229,11 +255,17 @@ const verifyOtpResetPass = async (req, res) => {
 const resetpassword = async (req, res) => {
   const { email, password, conf_password } = req.body;
   // const { id } = req.params;
-
   try {
+    let validPassword = isValidPassword(password);
+    if (!validPassword) {
+      return res.status(400).json({
+        status: "false",
+        message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
+      });
+    }
+
     if (password === conf_password) {
       // const designer = await Designer.findOne(id);
-
       const designer = await Designer.findOne({ email });
       const previousPassword = designer.password;
       const checkPreviousPass = await bcrypt.compare(
@@ -255,50 +287,45 @@ const resetpassword = async (req, res) => {
           message: "your password successfull reset",
         });
       }
-
     } else {
       return res.status(401).send({ status: "false", message: "password and conf_password are not matched" });
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).send(error.message);
   }
 };
 
-
-
-
 //for change password
 const changePassword = async (req, res) => {
   const { newPassword, confPassword } = req.body;
-
-  //validate password rajx
-  let reso = isValidPassword(newPassword);
-  if (!reso) {
+  //validate password rejex
+  let validPassword = isValidPassword(newPassword);
+  if (!validPassword) {
     return res.status(400).json({
+      status: "false",
       message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
     });
   }
-
   if (newPassword !== confPassword) {
-    return res.status(406).send("newPassword and confPassword are not same.");
+    return res.status(406).send({ status: "false", message: "confPassword not match with newPassword." });
   }
-
   try {
     const designer = await Designer.findById(req.designer._id);
     const prevPassword = designer.password;
     const checkPreviousPass = await bcrypt.compare(newPassword, prevPassword);
 
     if (checkPreviousPass) {
-      return res.status(400).send("enter a new password. your password are same with previous password");
+      return res.status(400).send({ status: "false", message: "enter a new password. your password are same with previous password" });
     }
     const hashPassword = await bcrypt.hash(newPassword, 10);
     await Designer.findByIdAndUpdate(req.designer._id, { $set: { password: hashPassword }, });
 
-    return res.status(200).send("successfully change password");
+    return res.status(200).send({ status: "false", message: "successfully change password" });
 
   } catch (error) {
     console.error(error);
-    return res.status(500).send(error.message);
+    return res.status(500).send({ error: error.message });
   }
 };
 
@@ -308,27 +335,24 @@ const addServices = async (req, res) => {
   try {
     const ser = await Services.findById(serviceId);
     if (!ser) {
-      return res.status(400).json({ message: "Service Not Found..!!" });
+      return res.status(400).json({ status: "false", message: "Service Not Found..!!" });
     }
 
     const designer = await Designer.findById(req.designer._id);
 
     //check if service is alredy exits in the designer data
-    const repo = designer.services.includes(serviceId);
-    if (repo) {
-      return res.status(400).json({ message: "Service is alredy exist..!!" });
+    const checkDuplicate = designer.services.includes(serviceId);
+    if (checkDuplicate) {
+      return res.status(400).json({ status: "false", message: "Service is alredy exist..!!" });
     }
 
     designer.services.push(serviceId);                                        //single data is added
     await designer.save();
-    return res.status(201).json({ message: "Service added successfully" });
+    return res.status(201).json({ status: "false", message: "Service added successfully" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
-
-
-
 
 const deleteService = async (req, res) => {
   const { serviceId } = req.body;
@@ -363,7 +387,6 @@ const getAllServices = async (req, res) => {
 };
 
 //manage product_categories at my profile
-
 const addProduct = async (req, res) => {
   const { productId } = req.body;
   try {
@@ -505,8 +528,6 @@ const getDesigner = async (req, res) => {
 }
 
 
-
-
 //find order order list
 const latestOrder = async (req, res) => {
   try {
@@ -601,7 +622,7 @@ const sendNotification = async (req, res) => {
 };
 
 module.exports = {
-  signup, sendotp, getCategories, getService, getSubService, signin, sendlinkresetPassword, verifyOtpResetPass, resetpassword, getDesigner, changePassword, addServices, deleteService, getAllServices,
+  signup, sendotp, getCategories, getService, getSubService, signin, sendOtpForResetPass, verifyOtpResetPass, resetpassword, getDesigner, changePassword, addServices, deleteService, getAllServices,
   addProduct, delProduct, getAllProduct, addSubService, delSubService, getAllSubService, updateBio, latestOrder,
   updateOrderStatus, previousOrder, sendNotification, getCategories
 };

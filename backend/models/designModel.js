@@ -46,6 +46,10 @@ const designerSchema = new mongoose.Schema({
     password:{
         type:String,
         default:null
+    },
+    lastLogin: {
+        type: Date,
+        default:Date.now()
     }
 
 },

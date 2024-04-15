@@ -7,12 +7,14 @@ const uploadFile = require('../middlewares/upload-file');
 
 router.post('/sendotp',reqFieldMiddleware, designController.sendotp)
 router.post('/designer/register', uploadFile, designController.signup);
-
 router.post('/designer/login', reqFieldMiddleware, designController.signin);
-router.post('/designer/slfrp', reqFieldMiddleware, designController.sendlinkresetPassword);
+
+router.post('/designer/otpForForgetPassword', reqFieldMiddleware, designController.sendOtpForResetPass);
 router.post('/designer/verifyOtp', reqFieldMiddleware, designController.verifyOtpResetPass);
-//router.post('/designer/resetpass/:id',reqFieldMiddleware,designController.resetpassword);
 router.post('/designer/resetpass',reqFieldMiddleware,designController.resetpassword);
+
+//router.post('/designer/resetpass/:id',reqFieldMiddleware,designController.resetpassword);
+
 router.get('/designer/getDesigner',auth,designController.getDesigner);
 router.post('/designer/changePass',reqFieldMiddleware, auth, designController.changePassword);
 

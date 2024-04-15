@@ -39,7 +39,8 @@ const consumerSchema = new mongoose.Schema({
         required:true
     },
     lastLogin: {
-        type: Date
+        type: Date,
+        default:Date.now()
     }
 
 },{timestamps:true});
