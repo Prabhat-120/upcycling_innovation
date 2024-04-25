@@ -6,7 +6,7 @@ const auth = require('../middlewares/auth-middleware').checkDesignerAuth;
 const uploadFile = require('../middlewares/upload-file');
 
 router.post('/sendotp',reqFieldMiddleware, designController.sendotp)
-router.post('/designer/register', uploadFile, designController.signup);
+router.post('/designer/register',  designController.signup);
 router.post('/designer/login', reqFieldMiddleware, designController.signin);
 
 router.post('/designer/otpForForgetPassword', reqFieldMiddleware, designController.sendOtpForResetPass);
