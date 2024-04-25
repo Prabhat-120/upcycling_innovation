@@ -50,8 +50,8 @@ const sendotp = async (req, res) => {
 //For Designer register
 const signup = async (req, res) => {
   try {
-    const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
-    const profile_pic = req.file.filename;
+    const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp, profile_pic } = req.body;
+    //const profile_pic = req.file.filename;
 
     const cate = JSON.parse(categories);
     const serv = JSON.parse(services);
