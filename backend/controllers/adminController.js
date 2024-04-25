@@ -14,10 +14,9 @@ const genotp = require('../services/OtpServices');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const mongoose = require('mongoose');
+const { isValidPassword, isValidEmail, isValidMob } = require('../Validator/validator')
 
 const secretkey = process.env.SECRETKEY;
-
-
 
 const sendotp = async (req, res) => {
     const { email } = req.body;
@@ -114,23 +113,8 @@ const signin = async (req, res) => {
     }
 };
 
-
-//for dashboard count totalDesigner 
-const getAllDesigner = async (req, res) => {
-    try {
-        const allDesigner = await Designer.find({}, { name: 1, email: 1, mob: 1, profile_pic: 1 });
-        const total = allDesigner.length;
-        return res.status(200).send({ "status": "success", "message": "total designer registers", "totalDesigner": total, "designer_list": allDesigner })
-    } catch (error) {
-        return res.status(500).send("Internal server error: " + error.message)
-    }
-};
-
-
 const filterDesignerData = async (req, res) => {
-
     try {
-
         const conditions = {};
         if (req.query.sDate && req.query.eDate) {
             conditions.createdAt = { $gt: new Date(req.query.sDate), $lte: new Date(req.query.eDate) }
@@ -156,65 +140,6 @@ const filterDesignerData = async (req, res) => {
     }
 };
 
-//filter designer with between tow dates
-// const getDesignerWithDate = async (req, res) => {
-
-//     const { start, end } = req.body;
-//     if (!start || !end) {
-//         return res.status(401).json({ "status": "failed", "message": "all field are required" });
-//     };
-
-//     const startDate = new Date(start);
-//     const endDate = new Date(end);
-
-//     try {
-//         const designer = await Designer.find({ createdAt: { $gt: startDate, $lte: endDate } });
-
-//         if (designer.length === 0) {
-//             return res.status(201).json({ "status": "success", "message": "no designer between this date" })
-//         };
-
-//         return res.status(201).json({ status: "success", total_designer: designer.length, data: designer });
-//     } catch (error) {
-//         return res.status(401).send(error.message)
-//     }
-// };
-
-
-// //filter designer With Name
-// const getDesignerWithName = async (req, res) => {
-//     const { name } = req.body;
-
-//     if (!name) {
-//         return res.status(401).json({ "status": "failed", "message": "all field are required" });
-//     }
-//     try {
-//         const designer = await Designer.find({ name: name });
-
-//         if (designer.length === 0) {
-//             return res.status(201).json({ "status": "success", "message": "name doesnot match with designer" })
-//         };
-
-//         return res.status(201).json({ status: "success", total_consumer: designer.length, Data: designer })
-//     } catch (error) {
-//         return res.status(401).send(error.message);
-//     }
-// }
-
-
-//for dashboard count totalConsumer 
-const getAllConsumer = async (req, res) => {
-    try {
-        const allconsumer = await Consumer.find({}, { name: 1, email: 1, mob: 1, Gender: 1, images: 1, lastLogin: 1 });
-        const total = allconsumer.length;
-        return res.status(200).send({ "status": "true", "message": "total consumer register", "totalConsumer": total, "consumer_list": allconsumer })
-    } catch (error) {
-        console.error(error)
-        return res.status(500).send("internal server error");
-    }
-};
-
-
 const filterConsumerData = async (req, res) => {
     try {
         const condition = {};
@@ -232,63 +157,13 @@ const filterConsumerData = async (req, res) => {
         }
 
         const result = await Consumer.find(condition, projection);
-
-
-        return res.status(200).send({"count":result.length,data:result});
+        return res.status(200).send({ "count": result.length, data: result });
     } catch (error) {
         return res.status(401).send(error.message);
     }
 };
 
-
-
-
-// //filter consumer between twodate
-// const filterConsumerWithDate = async (req, res) => {
-
-//     const { startdate, enddate } = req.body;
-//     if (!startdate || !enddate) {
-//         return res.status(401).json({ "status": "false", "message": "all field is required" })
-//     };
-
-//     try {
-//         //convert like database type date
-//         const startDate = new Date(startdate);
-//         const endDate = new Date(enddate);
-
-//         const consumer = await Consumer.find(
-//             { createdAt: { $gt: startDate, $lte: endDate } }
-//         );
-
-//         if (consumer.length === 0) {
-//             return res.status(201).json({ "status": "true", "message": "no consumer can registered between this Date" });
-//         };
-
-//         return res.status(201).send(consumer)
-//     } catch (error) {
-//         return res.status(401).send(error.message);
-//     }
-// };
-
-
-// //filter consumer with name 
-// const filterConsumerWithName = async (req, res) => {
-//     const { name } = req.body
-//     if (!name) {
-//         return res.status(401).json({ "status": "false", "message": "field is required" })
-//     };
-//     try {
-//         const consumer = await Consumer.find({ name: name });
-//         if (consumer.length === 0) {
-//             return res.status(201).json({ "status": "true", "message": "this name not match with any consumer" });
-//         }
-//         return res.status(201).send(consumer);
-//     } catch (error) {
-//         return res.status(401).send(error.message);
-//     }
-// };
-
-//admin add designer
+//designer add by admin
 const addDesigner = async (req, res) => {
     try {
         const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
@@ -346,79 +221,24 @@ const addDesigner = async (req, res) => {
 };
 
 
-
-// const addDesigner = async (req, res) => {
-//     try {
-//         const { name, mob, email, address, location, categories, services, subservices, Bio, password, conf_password, term_cond, otp } = req.body;
-//         const profile_pic = req.file.filename;
-
-//         if (!name || !mob || !email || !profile_pic || !address || !categories || !services || !subservices || !Bio || !password ||
-//             !conf_password || !term_cond || !otp || !location) {
-//             return res.status(404).send({ status: "false", message: "all field are required" });
-//         }
-
-//         const existDesigner = await Designer.findOne({ email });
-//         if (existDesigner) {
-//             return res.status(409).json({ status: "false", message: "Email already exists" });
-//         }
-
-//         const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
-
-//         if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
-//             return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
-//         }
-
-//         const hashpassword = await bcrypt.hash(password, 10);
-
-//         let coordinat = null;
-//         if (location) {
-//             coordinat = location.split(",").map(coord => parseFloat(coord.trim()));
-//         }
-
-//         const designer = new Designer({
-//             name,
-//             mob: parseInt(mob),
-//             email,
-//             profile_pic,
-//             address,
-//             location: location ? { type: "Point", coordinates: coordinat } : null,
-//             categories,
-//             services,
-//             subservices,
-//             Bio,
-//             password: hashpassword
-//         });
-
-//         await designer.save();
-//         await OTP.deleteOne({ otp });
-
-//         return res.status(200).json({ message: "Successfully registered" });
-//     } catch (error) {
-//         return res.status(500).json({ message: error.message });
-//     }
-// };
-
-//admin edit designer
-//admin delete designer
-
-
 //see the total_order with filter like between twodates
-
 const totalorder = async (req, res) => {
-    const { startDate, endDate } = req.body;
-
-    if (!startDate || !endDate) {
-        return res.status(401).json({ "status": "false", "message": "all field is required" });
-    }
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
     try {
-        const orders = await Order.find({ orderDate: { $gte: start, $lte: end } });
+        const conditions = {};
+        if (req.query.sDate && req.query.eDate) {
+            conditions.orderDate = { $gt: new Date(req.query.sDate), $lte: new Date(req.query.eDate) }
+        }
+        const projection = {
+            _id: 0,
+            createdAt: 0,
+            updatedAt: 0,
+            orderCompleteDate: 0,
+            __v: 0
+        }
+        const orders = await Order.find(conditions, projection);
         const total = orders.length;
 
         return res.status(201).json({ status: "success", total_order: total, data: orders })
-
     } catch (error) {
         return res.status(401).send(error.message)
     }
@@ -428,18 +248,15 @@ const totalorder = async (req, res) => {
 const addProduct = async (req, res) => {
     const { productName } = req.body;
     const profile_pic = req.file.filename;
-
     try {
         if (!productName || !profile_pic) {
             return res.status(401).json({ "status": "false", "message": "all field is required" });
         }
-
         //to find product with case insensitive form
         const existing_product = await Product.find({ productName: productName }).collation({ locale: 'en', strength: 1 })
         if (Array.isArray(existing_product) && existing_product.length > 0) {
             return res.status(400).json({ "status": "false", "message": "Product already exist in the database..!" });
         }
-
         const newProduct = new Product({
             productName,
             productPic: profile_pic
@@ -466,7 +283,6 @@ const editProduct = async (req, res) => {
             const profile_pic = req.file.filename;
             updateProduct.productPic = profile_pic;
         }
-
         const updatedProduct = await Product.findByIdAndUpdate(id, updateProduct, { new: true });
 
         if (!updatedProduct) {
@@ -478,7 +294,6 @@ const editProduct = async (req, res) => {
         return res.status(500).send("Internal server error");
     }
 };
-
 
 //delete the product from productCategory model
 const delProduct = async (req, res) => {
@@ -494,7 +309,6 @@ const delProduct = async (req, res) => {
 
 // Admin can check total active Consumers
 // Admin can check total In active Consumers
-
 const checkConsumerStatus = async (req, res) => {
     try {
         // Query the database to count active consumers
@@ -517,6 +331,26 @@ const checkConsumerStatus = async (req, res) => {
     }
 };
 
+const checkDesignerStatus = async (req, res) => {
+    try {
+        const activeDesignerCount = await Designer.countDocuments({
+            lastLogin: { $gte: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) }   // Designer who have logged in within the last 45days
+        });
+
+        // Query the database to count inactive consumers
+        const inactiveDesignerCount = await Designer.countDocuments({
+            lastLogin: { $lt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) }   // Designer who haven't logged in within the last 45days
+        });
+
+        // Return the counts
+        return res.status(200).json({
+            activeDesigners: activeDesignerCount,
+            inactiveDesigners: inactiveDesignerCount
+        });
+    } catch (error) {
+        return res.status(500).send("Internal server error" + error.message)
+    }
+}
 
 // Admin Can check the deleted Consumers.
 const checkDeletedConsumer = async (req, res) => {
@@ -532,28 +366,24 @@ const checkDeletedConsumer = async (req, res) => {
     }
 };
 
+const checkDeletedDesigner = async (req,res) => {
+    try {
+        const projection ={
+            name:1,
+            isDeleted:1,
+            _id:0
+        }
+        const designer = await Designer.find({ isDeleted: true }).select(projection);
+        const totalconsumer = designer.length;
+        return res.status(201).json({
+            status: "success", message: "softdeleted consumer list",
+            total_softdeleted_consumer: totalconsumer, data: designer
+        });
+    } catch (error) {
+        return res.send(error.message);
+    }
 
-//add product and related service from (productCategory and service) model respectively in consumerProduct model.
-// const consProduct = async (req, res) => {
-//     try {
-//         const { product, services } = req.body;
-//         if (!product || !services) {
-//             return res.status(401).send("all field is required");
-//         }
-//         const newProduct = new consumerProduct({
-//             product,
-//             services
-//         });
-
-//         await newProduct.save();
-
-//         res.status(201).send("succesfull product add");
-//     } catch (error) {
-//         res.status(401).send(error.message);
-//     }
-// };
-
-
+}
 //addservices in the  service document
 const addServices = async (req, res) => {
     try {
@@ -620,11 +450,46 @@ const addSubService = async (req, res) => {
     }
 };
 
+const changePassword = async (req,res)=>{
+    try{
+        const {password, confirmPassword} = req.body;
+
+        let validPassword = isValidPassword(password);
+        if(!validPassword){
+            return res.status(401).send({status:"false",message:"Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character & it should not have blank space"})
+        }
+
+        if(password !== confirmPassword){
+            return res.status(401).send({status:"false", message:"confrimPassword are not matched with password"})
+        }
+
+        const admin = await Admin.findById(req.admin._id);
+        const previousPassword = admin.password;
+
+        const comparePassword = bcrypt.compare(password, previousPassword);
+        if(comparePassword){
+            return res.status(401).send({status:"false", message:"Enter a new password. password are matched with previous password"})
+        }
+        await Admin.findByIdAndUpdate(req.admin._id, { $set: { password: hashPassword } });
+        const hashPassword = bcrypt.hash(password,10);
+
+
+        
+       
+
+    }catch(error){
+        return res.status(500).send({message:"Internal server error" , error:error.message})
+    }
+}
+
 
 
 module.exports = {
-    sendotp, signUp, signin, getAllDesigner, getAllConsumer, filterDesignerData, filterConsumerData, addDesigner, addProduct, editProduct, delProduct, checkConsumerStatus, checkDeletedConsumer, addServices,
-    editService, addSubService, totalorder
+    sendotp, signUp, signin,
+    filterDesignerData, filterConsumerData, addDesigner, addProduct,
+    editProduct, delProduct, checkConsumerStatus, checkDesignerStatus, 
+    checkDeletedConsumer,checkDeletedDesigner,
+    addServices, editService, addSubService, totalorder, changePassword
 };
 
 

@@ -10,6 +10,6 @@ const productSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const Product = mongoose.model("Category", productSchema);
+const Product = mongoose.model("categories", productSchema);
 
 module.exports = Product;

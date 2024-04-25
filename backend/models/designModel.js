@@ -50,6 +50,10 @@ const designerSchema = new mongoose.Schema({
     lastLogin: {
         type: Date,
         default:Date.now()
+    },
+    isDeleted:{
+        type:Boolean,
+        default:false
     }
 
 },

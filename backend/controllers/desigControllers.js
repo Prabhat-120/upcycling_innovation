@@ -57,14 +57,19 @@ const signup = async (req, res) => {
     const serv = JSON.parse(services);
     const subserv = JSON.parse(subservices);
 
+    let validEmail = isValidEmail(email);
+    if (!validEmail) {
+      return res.status(400).json({
+        status: "false",
+        message: "please enter correct email patteren",
+      });
+    }
     const existDesigner = await Designer.findOne({ email });
-
     if (existDesigner) {
       return res.status(409).json({ status: "false", message: "Email already exists" });
     }
 
     const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
-
     if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
       return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
     }
@@ -87,7 +92,7 @@ const signup = async (req, res) => {
     const categoriesArray = cate.map(item => new mongoose.Types.ObjectId(item.value));
     const servicesArray = serv.map(item => new mongoose.Types.ObjectId(item.value));
     const subservicesArray = subserv.map(item => new mongoose.Types.ObjectId(item.value));
-
+//hello i am prabhat panigrahi j
     const designer = new Designer({
       name,
       mob: parseInt(mob),
@@ -139,7 +144,6 @@ const getSubService = async (req, res) => {
   }
 };
 
-
 //for login
 const signin = async (req, res) => {
   const { email, password } = req.body;
@@ -180,7 +184,6 @@ const signin = async (req, res) => {
   }
 };
 
-
 //link send to gmail for reset password
 const sendOtpForResetPass = async (req, res) => {
   const { email } = req.body;
@@ -193,6 +196,7 @@ const sendOtpForResetPass = async (req, res) => {
       });
     }
     const designer = await Designer.findOne({ email });
+
     if (designer) {
       // const link = `http://localhost:3000/designer/resetpassword/${designer._id}`;
       // console.log(link);
@@ -232,9 +236,14 @@ const sendOtpForResetPass = async (req, res) => {
 const verifyOtpResetPass = async (req, res) => {
   const { otp, email } = req.body;
   try {
-    // Find the OTP document by email and OTP value
-    const otpDocument = await OTP.findOne({ email, otp });
-
+    let validEmail = isValidEmail(email);
+    if (!validEmail) {
+      return res.status(400).json({
+        status: "false",
+        message: "please enter correct email patteren",
+      });
+    }
+    const otpDocument = await OTP.findOne({ email, otp });       // Find the OTP document by email and OTP value
     if (!otpDocument) {
       return res.status(404).send({ "status": "false", "message": "OTP not found or expired" });
     }
@@ -243,7 +252,6 @@ const verifyOtpResetPass = async (req, res) => {
     if (otpDocument.expiresAt < new Date()) {
       return res.status(401).send({ "status": "false", "message": "OTP expired" });
     }
-
     //await OTP.deleteOne({ email, otp });
     return res.status(200).send({ "status": "true", "message": "OTP verified successfully" });
   } catch (error) {
@@ -299,18 +307,17 @@ const resetpassword = async (req, res) => {
 //for change password
 const changePassword = async (req, res) => {
   const { newPassword, confPassword } = req.body;
-  //validate password rejex
-  let validPassword = isValidPassword(newPassword);
-  if (!validPassword) {
-    return res.status(400).json({
-      status: "false",
-      message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
-    });
-  }
-  if (newPassword !== confPassword) {
-    return res.status(406).send({ status: "false", message: "confPassword not match with newPassword." });
-  }
   try {
+    let validPassword = isValidPassword(newPassword);
+    if (!validPassword) {
+      return res.status(400).json({
+        status: "false",
+        message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character",
+      });
+    }
+    if (newPassword !== confPassword) {
+      return res.status(406).send({ status: "false", message: "confPassword not match with newPassword." });
+    }
     const designer = await Designer.findById(req.designer._id);
     const prevPassword = designer.password;
     const checkPreviousPass = await bcrypt.compare(newPassword, prevPassword);
@@ -322,7 +329,6 @@ const changePassword = async (req, res) => {
     await Designer.findByIdAndUpdate(req.designer._id, { $set: { password: hashPassword }, });
 
     return res.status(200).send({ status: "false", message: "successfully change password" });
-
   } catch (error) {
     console.error(error);
     return res.status(500).send({ error: error.message });
@@ -519,9 +525,13 @@ const updateBio = async (req, res) => {
 
 const getDesigner = async (req, res) => {
   try {
-    const result = await Designer.findById(req.designer._id);
+    const projection = {
+      name: 1,
+      profile_pic: 1,
+      _id: 0
+    }
+    const result = await Designer.findById(req.designer._id).select(projection);
     return res.status(200).send(result);
-
   } catch (error) {
     return res.status(500).json({ status: "false", message: error.message });
   }
@@ -558,11 +568,9 @@ const updateOrderStatus = async (req, res) => {
       { _id: orderId, tailorId: tailorId },
       { $set: { status: status } }
     );
-
     if (result.nModified === 0) {
       return res.status(404).json({ message: "Order not found or unauthorized to update" });
     }
-
     return res.send({
       message: "Your status was successfully updated.",
       data: result,
@@ -578,7 +586,7 @@ const previousOrder = async (req, res) => {
     const orders = await Order.find({
       $and: [
         { tailorId: req.designer._id },
-        { status: { $in: ["completed", "processing", "canceled"] } },
+        { status: { $in: ["completed", "canceled"] } },
       ],
     }).populate('consumerId');
     if (orders.length === 0) {

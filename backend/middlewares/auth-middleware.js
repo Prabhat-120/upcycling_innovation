@@ -5,27 +5,27 @@ const Consumer = require('../models/consumerModel');
 const secretkey = process.env.SECRETKEY;                //create a .env file and store the secreate key value in there
 
 
-const checkDesignerAuth = async(req,res,next)=>{
+const checkDesignerAuth = async (req, res, next) => {
     let token
-    const {authorization} = req.headers;
-    if(authorization && authorization.startsWith('Bearer')) {
-        try{
+    const { authorization } = req.headers;
+    if (authorization && authorization.startsWith('Bearer')) {
+        try {
             //get token from header
             token = authorization.split(' ')[1]
-         
+
             //verify token
-            const {designerId} = jwt.verify(token,secretkey)
+            const { designerId } = jwt.verify(token, secretkey)
 
             //get user from token
             req.designer = await Designer.findById(designerId).select('-password');
             next()
-            
-        }catch(err){
-            res.status(401).send({"status":"failed", "message":"unauthorized user"});
+
+        } catch (err) {
+            res.status(401).send({ "status": "failed", "message": "unauthorized user" });
         }
     }
-    if(!token){
-        res.status(401).send({"status":"failed", "message":"unauthorised user, No token!"});
+    if (!token) {
+        res.status(401).send({ "status": "failed", "message": "unauthorised user, No token!" });
     }
 };
 
@@ -55,10 +55,9 @@ const checkAdminAuth = async (req, res, next) => {
         if (!authorization || !authorization.startsWith('Bearer')) {
             return res.status(401).send({ status: "failed", message: "Unauthorized, No token!" });
         }
-
         const token = authorization.split(' ')[1];
         const { adminId } = jwt.verify(token, secretkey);
-        req.consumer = await Consumer.findById(adminId).select('-password');
+        req.admin = await Consumer.findById(adminId).select('-password');
         next();
     } catch (error) {
         console.error(error);
@@ -70,4 +69,4 @@ const checkAdminAuth = async (req, res, next) => {
 };
 
 
-module.exports={checkDesignerAuth, checkConsumerAuth, checkAdminAuth};
+module.exports = { checkDesignerAuth, checkConsumerAuth, checkAdminAuth };
