@@ -113,6 +113,7 @@ const signup = async (req, res) => {
 
     return res.status(200).json({ status: "true", message: "Successfully registered" });
   } catch (error) {
+    console.log(req.body)
     return res.status(500).json({ message: error.message });
   }
 };
