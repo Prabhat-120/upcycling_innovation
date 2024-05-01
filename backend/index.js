@@ -13,17 +13,17 @@ connectdb();
 const app = express();
 app.use(cors());
 
-app.use(bodyparser.json({limit:"100mb"}));
-app.use(bodyparser.urlencoded({extended:true,limit:"100mb"}));
+app.use(bodyparser.json({ limit: "100mb" }));
+app.use(bodyparser.urlencoded({ extended: true, limit: "100mb" }));
 
-app.use("/images",express.static('uploads'));
+app.use("/images", express.static('uploads'));
 
-app.use('/',route);
-app.use('/',conRoute);
-app.use('/',admRoute);
+app.use('/', route);
+app.use('/', conRoute);
+app.use('/', admRoute);
 
 const port = process.env.PORT || 8000;
 
-app.listen(port,()=>{
+app.listen(port, () => {
     console.log(`server run at http://localhost:${port}`);
 });

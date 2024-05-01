@@ -16,23 +16,18 @@ const uploadFile = (req, res, next) => {
     }).single('profile_pic');
 
     upload_file(req, res, async (err) => {
-        //console.log("first")
         if (!req.file) {
             return res.status(401).send({
                 error: { message: "Select image" }
             })
-           
         } else if (err) {
             return res.status(403).send({
                 error: { message: "Image not uploaded" }
             })
-
         } else {
-            // console.log(process.env.BASE_URL);
-            // req.body.imgUrl = { filepath_url: req.file.filename, url: process.env.BASE_URL + "/uploads/" + req.file.filename }
             next()
         }
     });
 }
 
-module.exports = uploadFile
+module.exports = uploadFile;
