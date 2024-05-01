@@ -93,7 +93,10 @@ const signup = async (req, res) => {
     const servicesArray = serv.map(item => new mongoose.Types.ObjectId(item.value));
     const subservicesArray = subserv.map(item => new mongoose.Types.ObjectId(item.value));
     //hello i am prabhat panigrahi j
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/flutter_demo
     console.log(req.body);
     const designer = new Designer({
       name,
@@ -114,6 +117,7 @@ const signup = async (req, res) => {
 
     return res.status(200).json({ status: "true", message: "Successfully registered" });
   } catch (error) {
+    console.log(req.body)
     return res.status(500).json({ message: error.message });
   }
 };
