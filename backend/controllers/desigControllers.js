@@ -92,7 +92,8 @@ const signup = async (req, res) => {
     const categoriesArray = cate.map(item => new mongoose.Types.ObjectId(item.value));
     const servicesArray = serv.map(item => new mongoose.Types.ObjectId(item.value));
     const subservicesArray = subserv.map(item => new mongoose.Types.ObjectId(item.value));
-//hello i am prabhat panigrahi j
+    //hello i am prabhat panigrahi j
+    console.log(req.body);
     const designer = new Designer({
       name,
       mob: parseInt(mob),
