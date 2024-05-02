@@ -47,15 +47,38 @@ const sendotp = async (req, res) => {
   }
 };
 
+
+function parseToArray(input) {
+  if (!input) {
+    return [];
+  }
+  if (Array.isArray(input)) {
+    console.log(input);
+    return input.map(item =>new mongoose.Types.ObjectId(item.trim(),console.log(item)));
+    
+  } else if (typeof input === 'string') {
+    console.log(input);
+    const items = input.split(',');
+    return items.map(item => new mongoose.Types.ObjectId(item.trim()));
+  } else {
+    throw new Error("Invalid input type for categories, services, or subservices");
+  }
+}
+
 //For Designer register
 const signup = async (req, res) => {
   try {
-    const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp, profile_pic } = req.body;
+    const { name, mob, email, address, location,  Bio, password, otp, profile_pic } = req.body;
     //const profile_pic = req.file.filename;
+    console.log(req.body)
 
-    const cate = JSON.parse(categories);
-    const serv = JSON.parse(services);
-    const subserv = JSON.parse(subservices);
+    const categories = req.body.categories;
+    const services = req.body.services;
+    const subservices = req.body.subservices;
+
+    const categoriesArray = parseToArray(categories);
+    const servicesArray = parseToArray(services);
+    const subservicesArray = parseToArray(subservices);
 
     let validEmail = isValidEmail(email);
     if (!validEmail) {
@@ -89,11 +112,9 @@ const signup = async (req, res) => {
     }
 
     // Mapping categories, services, and subservices to get array of ObjectIds
-    const categoriesArray = cate.map(item => new mongoose.Types.ObjectId(item.value));
-    const servicesArray = serv.map(item => new mongoose.Types.ObjectId(item.value));
-    const subservicesArray = subserv.map(item => new mongoose.Types.ObjectId(item.value));
-    //hello i am prabhat panigrahi j
-    console.log(req.body);
+    
+    
+
     const designer = new Designer({
       name,
       mob: parseInt(mob),
