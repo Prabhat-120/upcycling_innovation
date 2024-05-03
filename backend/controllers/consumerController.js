@@ -8,8 +8,8 @@ const jwt = require('jsonwebtoken');
 
 // const genotp = require('../services/OtpServices');
 // const transporter = require("../Config/mailconfig");
-// const OTP = require('../models/otpModel');
-
+ 
+const OTP = require('../models/otpModel');
 const sendotp = require('../services/sendOTPByEmail');
 const Designer = require('../models/designModel');
 const Order = require('../models/orderModel');
@@ -32,46 +32,13 @@ const sendOTPToConsumer = async (req, res) => {
             });
         }
         const result = await sendotp(email);
-        console.log(result);
         return res.send(result);
     } catch (error) {
         return res.status(500).send({ status: "error", message: error.message });
     }
 }
 
-//send otp
-// const sendotp = async (req, res) => {
-//     const { email } = req.body;
-//     try {
-//         let validEmail = isValidEmail(email);
-//         if (!validEmail) {
-//             return res.status(400).json({
-//                 status: "false",
-//                 message: "please enter correct email patteren",
-//             });
-//         }
-//         if (!email) {
-//             return res.status(400).send({ status: "failed", message: "Email is required." });
-//         }
-//         const newotp = new OTP({
-//             otp: genotp(),
-//             email
-//         });
-//         await newotp.save();
-//         // Send OTP to email
-//         const info = await transporter.sendMail({
-//             from: "prabhatpanigrahi120@gmail.com",
-//             to: email,
-//             subject: "Verification Email",
-//             html: `<h1>Please confirm your OTP</h1>
-//         <p>Here is your OTP code: ${newotp.otp}</p>`,
-//         });
 
-//         return res.send({ status: "success", message: "OTP sent to your email." });
-//     } catch (error) {
-//         return res.status(500).send({ status: "error", message: error.message });
-//     }
-// };
 
 //register consumer
 const signup = async (req, res) => {
@@ -330,17 +297,6 @@ const searching = async (req, res) => {
 }
 
 
-//get all related services when click on product
-// const getService = async (req, res) => {
-//     const {productId} = req.body;
-//     try {
-//         const result = await consProduct.find({ product: productId }, { services: 1, _id: 0 }).populate('services');
-//         res.send(result);
-//     } catch (error) {
-//         res.status(500).send(error.message);
-//     }
-// };
-
 
 /* important:  db.designers.find({ "services": { $elemMatch: { $eq: ObjectId("65d2e2fa4d7d745fb3c83f26") } } });        
 await Designer.find({services:{$elemMatch:{$eq:"65d2e2fa4d7d745fb3c83f26"}}});
@@ -374,7 +330,7 @@ await Designer.find({services:{$elemMatch:{$eq:"65d2e2fa4d7d745fb3c83f26"}}});
 
 //find nearest designer
 const getDesigner = async (req, res) => {
-    const { longitude, latitude, serviceId, categoryId } = req.body;
+    const { serviceId, categoryId } = req.body;
     try {
         long = parseFloat(req.body.longitude);
         lati = parseFloat(req.body.latitude);
@@ -491,7 +447,6 @@ const giveOrder = async (req, res) => {
 };
 
 
-//checkorder status
 //1.for continued order
 const processingOrder = async (req, res) => {
     try {
@@ -561,6 +516,4 @@ module.exports = {
 
 
 
-//order collection me productID or serviceId add karna hai(mid-sem internal)
 
-// getService,sendotp
