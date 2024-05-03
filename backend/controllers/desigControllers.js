@@ -111,11 +111,6 @@ const signup = async (req, res) => {
       coordinat = location.split(",").map(coord => parseFloat(coord.trim()));
     }
 
-    
-   
-    
-    
-
     const designer = new Designer({
       name,
       mob: parseInt(mob),
