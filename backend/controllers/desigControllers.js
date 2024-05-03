@@ -111,19 +111,11 @@ const signup = async (req, res) => {
       coordinat = location.split(",").map(coord => parseFloat(coord.trim()));
     }
 
-    // Mapping categories, services, and subservices to get array of ObjectIds
-<<<<<<< HEAD
-    const categoriesArray = cate.map(item => new mongoose.Types.ObjectId(item.value));
-    const servicesArray = serv.map(item => new mongoose.Types.ObjectId(item.value));
-    const subservicesArray = subserv.map(item => new mongoose.Types.ObjectId(item.value));
-    //hello i am prabhat panigrahi j
-
-    console.log(req.body);
-=======
+    
+   
     
     
 
->>>>>>> origin/flutter_demo
     const designer = new Designer({
       name,
       mob: parseInt(mob),
