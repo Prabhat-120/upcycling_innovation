@@ -113,12 +113,9 @@ const signup = async (req, res) => {
     }
 
     // Mapping categories, services, and subservices to get array of ObjectIds
-<<<<<<< HEAD
     
-=======
 
 
->>>>>>> flutter_demo
     console.log(req.body);
     const designer = new Designer({
       name,
