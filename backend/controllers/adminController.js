@@ -1,5 +1,4 @@
 const Product = require('../models/categoriesModel');
-const consumerProduct = require('../models/productModel')
 const Designer = require('../models/designModel');
 const Consumer = require('../models/consumerModel')
 const Services = require('../models/serviceModel');

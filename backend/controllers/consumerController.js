@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 
 // const genotp = require('../services/OtpServices');
 // const transporter = require("../Config/mailconfig");
- 
+
 const OTP = require('../models/otpModel');
 const sendotp = require('../services/sendOTPByEmail');
 const Designer = require('../models/designModel');
@@ -36,11 +36,8 @@ const sendOTPToConsumer = async (req, res) => {
     } catch (error) {
         return res.status(500).send({ status: "error", message: error.message });
     }
-}
+};
 
-
-
-//register consumer
 const signup = async (req, res) => {
     const { firstName, lastName, email, mob, DOB, Gender, password, term_cond, otp } = req.body;
     profile_pic = req.file.filename;
@@ -111,7 +108,6 @@ const signup = async (req, res) => {
     }
 };
 
-//consumer signin
 const signin = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -153,7 +149,6 @@ const signin = async (req, res) => {
     }
 };
 
-//send link for reset password
 const sendLinkResetPassword = async (req, res) => {
     const { email } = req.body;
     try {
@@ -178,7 +173,6 @@ const sendLinkResetPassword = async (req, res) => {
     }
 };
 
-//reset the password
 const resetPassword = async (req, res) => {
     const { password, conf_password } = req.body;
     const { id } = req.params;
@@ -210,7 +204,7 @@ const resetPassword = async (req, res) => {
     }
 };
 
-//change password
+
 const changePassword = async (req, res) => {
     const { password, confPassword } = req.body;
     try {

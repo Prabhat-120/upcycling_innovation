@@ -16,6 +16,10 @@ const { isValidPassword, isValidEmail } = require('../Validator/validator')
 const sendotp = async (req, res) => {
   const { email } = req.body;
   try {
+    if (!email) {
+      return res.status(400).send({ status: "failed", message: "Email is required." });
+    }
+
     let validEmail = isValidEmail(email);
     if (!validEmail) {
       return res.status(400).json({
@@ -23,10 +27,7 @@ const sendotp = async (req, res) => {
         message: "please enter correct email patteren",
       });
     }
-
-    if (!email) {
-      return res.status(400).send({ status: "failed", message: "Email is required." });
-    }
+    
     const newotp = new OTP({
       otp: genotp(),
       email,
@@ -114,7 +115,7 @@ const signup = async (req, res) => {
     // Mapping categories, services, and subservices to get array of ObjectIds
     
     
-
+    console.log(req.body);
     const designer = new Designer({
       name,
       mob: parseInt(mob),
