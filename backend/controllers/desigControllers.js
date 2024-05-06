@@ -576,7 +576,7 @@ const latestOrder = async (req, res) => {
 
     return res
       .status(201)
-      .send(result);
+      .send({data:result});
   } catch (error) {
     return res.status(401).send(error.message);
   }
