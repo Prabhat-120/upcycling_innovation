@@ -27,7 +27,7 @@ const sendotp = async (req, res) => {
         message: "please enter correct email patteren",
       });
     }
-    
+
     const newotp = new OTP({
       otp: genotp(),
       email,
@@ -55,8 +55,8 @@ function parseToArray(input) {
   }
   if (Array.isArray(input)) {
     console.log(input);
-    return input.map(item =>new mongoose.Types.ObjectId(item.trim(),console.log(item)));
-    
+    return input.map(item => new mongoose.Types.ObjectId(item.trim(), console.log(item)));
+
   } else if (typeof input === 'string') {
     console.log(input);
     const items = input.split(',');
@@ -69,7 +69,7 @@ function parseToArray(input) {
 //For Designer register
 const signup = async (req, res) => {
   try {
-    const { name, mob, email, address, location,  Bio, password, otp, profile_pic } = req.body;
+    const { name, mob, email, address, location, Bio, password, otp, profile_pic } = req.body;
     //const profile_pic = req.file.filename;
     console.log(req.body)
 
@@ -113,7 +113,12 @@ const signup = async (req, res) => {
     }
 
     // Mapping categories, services, and subservices to get array of ObjectIds
+<<<<<<< HEAD
     
+=======
+
+
+>>>>>>> flutter_demo
     console.log(req.body);
     const designer = new Designer({
       name,
@@ -567,7 +572,7 @@ const latestOrder = async (req, res) => {
     const result = await Order.find({
       tailorId: req.designer._id,
       status: "pending",
-    }).populate("consumerId");
+    }).populate([{ path: 'consumerId', select: 'images name -_id' }]);
 
     if (result.length === 0) {
       return res.send({ message: "tailor does not have latest order", status: "empty" });
@@ -575,7 +580,7 @@ const latestOrder = async (req, res) => {
 
     return res
       .status(201)
-      .send({data:result});
+      .send({ data: result });
   } catch (error) {
     return res.status(401).send(error.message);
   }
@@ -611,12 +616,13 @@ const previousOrder = async (req, res) => {
         { tailorId: req.designer._id },
         { status: { $in: ["completed", "canceled"] } },
       ],
-    }).populate('consumerId');
+    }).populate([{ path: 'consumerId', select: 'images name -_id' }]);
+
     if (orders.length === 0) {
       return res.status(202).send({ message: "does not have any previous order", status: "empty" });
     }
 
-    return res.status(201).send(orders);
+    return res.status(201).send({"status":true, messaage:"successfull listed", data:orders});
   } catch (error) {
     return res.status(401).send(error.message);
   }
