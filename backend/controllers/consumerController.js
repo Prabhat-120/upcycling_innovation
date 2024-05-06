@@ -1,7 +1,7 @@
 const Consumer = require('../models/consumerModel');
 const consProduct = require('../models/productModel');
 const productCategory = require('../models/categoriesModel');
-const { ObjectId } = require('mongoose').Types;
+const  { ObjectId }  = require('mongoose').Types;
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -34,14 +34,14 @@ const sendOTPToConsumer = async (req, res) => {
         return res.status(500).send({ status: "error", message: error.message });
     }
 };
-
+  
 //register consumer
 const signup = async (req, res) => {
-    const { firstName, lastName, email, mob, DOB, Gender, password, conf_password, term_cond, otp } = req.body;
-    profile_pic = req.file.filename;
+    const {firstName, lastName, email, mob,  DOB, Gender, password, conf_password, term_cond, otp} = req.body;
+    profile_pic =  req.file.filename;
 
     try {
-        if (!firstName || !lastName || !email || !mob || !profile_pic || !DOB || !Gender || !password || !conf_password || !term_cond || !otp) {
+        if (!firstName || !lastName || !email || !mob  || !profile_pic || !DOB || !Gender || !password || !conf_password || !term_cond || !otp){
             return res.status(401).send("all fields are required");
         };
         console.log(req.body)
@@ -58,23 +58,23 @@ const signup = async (req, res) => {
             } else {
                 if (password === conf_password) {
                     const hashpassword = await bcrypt.hash(password, 10);
-
-                    fullname = firstName + " " + lastName;
+                    
+                    fullname = firstName+ " " +lastName;
 
                     const consumer = new Consumer({
-                        name: fullname,
+                        name:fullname,
                         email,
                         mob,
-                        images: profile_pic,
+                        images:profile_pic,
                         DOB,
                         Gender,
                         password: hashpassword,
                         term_cond,
-                        lastLogin: new Date()
+                        lastLogin: new Date() 
                     });
 
                     await consumer.save();
-
+                    
                     // Delete the OTP document from the OTP schema
                     await OTP.deleteOne({ otp });
                     return res.status(200).send({ "status": "success", "message": "Register Successfull" });
@@ -91,89 +91,89 @@ const signup = async (req, res) => {
 };
 
 //consumer signin
-const signin = async (req, res) => {
-    const { email, password } = req.body;
+const signin = async (req,res)=>{
+    const {email, password } = req.body;  
     try {
-        const consumer = await Consumer.findOne({ email, isDeleted: false });
-        if (!consumer) {
+        const consumer = await Consumer.findOne({email, isDeleted:false});
+        if(!consumer){
             return res.send("Your email is not registered or your account deleted. contact to the admin by contactus");
         }
 
         const passwordMatch = await bcrypt.compare(password, consumer.password)
-        if (!passwordMatch) {
-            return res.send("You entered the wrong password.")
+        if(!passwordMatch){
+           return res.send("You entered the wrong password.")
         }
 
-        const token = jwt.sign({ consumerId: consumer._id }, secretkey, { expiresIn: "20m" });
+        const token =jwt.sign({consumerId:consumer._id}, secretkey, {expiresIn:"20m"});
 
         consumer.lastLogin = new Date();
         await consumer.save();
 
-        return res.status(201).send({ "status": "success", "message": "Login successful!", "token": token });
+        return res.status(201).send({"status":"success","message":"Login successful!", "token":token});
     } catch (error) {
         res.status(500).send(error.message);
     }
 };
 
 //send link for reset password
-const sendLinkResetPassword = async (req, res) => {
-    const { email } = req.body;
-    try {
+const sendLinkResetPassword = async(req,res)=>{
+    const {email} = req.body;
+    try{
         console.log(req.body);
-        const consumer = await Consumer.findOne({ email });
-        if (consumer) {
-
+        const consumer = await Consumer.findOne({email});
+        if(consumer){
+    
             const link = `http://localhost:3000/designer/resetpassword/${consumer._id}`
             console.log(link);
-
+    
             const info = await transporter.sendMail({
-                from: "prabhatpanigrahi120@gmail.com",
-                to: consumer.email,
-                subject: "login-password reset",
-                html: `<a href=${link}>Click here</a>to Reset your password`
+                from:"prabhatpanigrahi120@gmail.com",   
+                to:consumer.email,
+                subject:"login-password reset",
+                html:`<a href=${link}>Click here</a>to Reset your password` 
             });
-            res.status(200).send({ "status": "success", "message": "reset password link share with your gmail account" })
-        } else {
-            res.status(406).send({ "status": "failed", "message": "enter your registered gmail account" })
+            res.status(200).send({"status":"success", "message":"reset password link share with your gmail account"})
+        }else{
+            res.status(406).send({"status":"failed", "message":"enter your registered gmail account"})
         }
-    } catch (error) {
+    }catch(error){
         res.send(error.message);
     }
 };
 
 //reset the password
-const resetPassword = async (req, res) => {
-    const { password, conf_password } = req.body;
-    const { id } = req.params;
-    try {
-        if (password === conf_password) {
+const resetPassword = async (req,res) =>{
+    const {password, conf_password} = req.body;
+    const {id} = req.params;
+    try{
+        if(password === conf_password){
             const consumer = await Consumer.findById(id);
             const previousPassword = consumer.password;
-            const checkPreviousPass = await bcrypt.compare(password, previousPassword);
-            if (checkPreviousPass) {
+            const checkPreviousPass = await bcrypt.compare(password,previousPassword);
+            if(checkPreviousPass){
                 return res.status(406).send("enter a new password. your password are same with previous password");
-            } else {
+            }else{
                 const hashPassword = await bcrypt.hash(password, 10);
-                await Consumer.findByIdAndUpdate(consumer.id, { $set: { password: hashPassword } });
-                return res.status(200).send({ "status": "success", "message": "your password successfull reset" })
+                await Consumer.findByIdAndUpdate(consumer.id,{$set:{password:hashPassword}});
+                return res.status(200).send({"status":"success", "message":"your password successfull reset"})
             }
-        } else {
+        }else{
             return res.status(401).send("password and conf_password are not matched")
         }
-    } catch (error) {
+    }catch(error){
         return res.status(500).send(error.message);
     }
 };
 
 //change password
-const changePassword = async (req, res) => {
+const changePassword = async(req,res)=>{
     const { newPassword, confPassword } = req.body;
     try {
-        if (newPassword !== confPassword) {
+        if(newPassword !== confPassword){
             return res.status(406).send("newPassword and confPassword are not same.")
         }
         const hashPassword = await bcrypt.hash(newPassword, 10);
-        await Consumer.findByIdAndUpdate(req.consumer._id, { $set: { password: hashPassword } });
+        await Consumer.findByIdAndUpdate(req.consumer._id, {$set:{password:hashPassword}});
         return res.status(200).send("successfully change password");
 
     } catch (error) {
@@ -184,22 +184,22 @@ const changePassword = async (req, res) => {
 
 
 //get all products from productCategory which admin are push
-const getAllProducts = async (req, res) => {
-    try {
-        const result = await productCategory.find({});
+const getAllProducts = async (req,res)=>{
+    try{
+        const result= await productCategory.find({});
         res.send(result);
-    } catch (error) {
+    }catch(error){
         res.status(500).send(error.message)
     }
 };
 
 
 //get all services at home page
-const getAllServices = async (req, res) => {
-    try {
-        const result = await Services.find({}, { _id: 0 });
+const getAllServices = async(req,res)=>{
+    try{
+        const result = await Services.find({},{_id:0});
         res.send(result);
-    } catch (error) {
+    }catch(error){
         res.status(500).send(error.message);
     }
 }
@@ -207,7 +207,7 @@ const getAllServices = async (req, res) => {
 
 //get all related services when click on product
 const getService = async (req, res) => {
-    const { productId } = req.body;
+    const {productId} = req.body;
     try {
         const result = await consProduct.find({ product: productId }, { services: 1, _id: 0 }).populate('services');
         res.send(result);
@@ -265,10 +265,10 @@ const getDesigner = async (req, res) => {
                 $project: {
                     password: 0, // Exclude the password field
                     _id: 0, // Exclude the _id field
-                    term_cond: 0,
-                    createdAt: 0,
-                    updatedAt: 0,
-                    __v: 0
+                    term_cond:0,
+                    createdAt:0,
+                    updatedAt:0,
+                    __v:0
                 }
             }
         ]);
@@ -283,27 +283,27 @@ const getDesigner = async (req, res) => {
 //add video
 
 //give order to designer
-const giveOrder = async (req, res) => {
-    const { orderDesc, photo, video, tailorId, productId, serviceId } = req.body;
-    try {
+const giveOrder = async(req,res)=>{
+    const { orderDesc, photo, video,  tailorId, productId, serviceId  } = req.body;
+    try{
         const newOrder = new Order({
             orderDesc,
             photo,
             video,
             productId,
             serviceId,
-            consumerId: req.consumer._id,
+            consumerId:req.consumer._id,
             tailorId,
-            status: "pending",
-            orderDate: Date.now(),
-            orderCompleteDate: null
+            status:"pending",
+            orderDate:Date.now(),
+            orderCompleteDate:null
         });
 
         await newOrder.save();
 
         res.status(201).send("order placed successfull.waiting for designer confirmation.");
 
-    } catch (error) {
+    }catch(error){
         res.status(400).send(error.message)
     }
 };
@@ -311,62 +311,58 @@ const giveOrder = async (req, res) => {
 
 //checkorder status
 //1.for continued order
-const processingOrder = async (req, res) => {
-    try {
+const processingOrder = async (req,res)=>{
+    try{
         const orders = await Order.find(
-            {
-                $and: [
-                    { consumerId: req.consumer._id },
-                    { status: { $in: ["pending", "processing", "confirm"] } }
-                ]
-            }
+            {$and:[
+                { consumerId: req.consumer._id },
+                {status: { $in: ["pending", "processing", "confirm"] } }
+            ]}
         );
-        if (orders.length > 0) {
+        if(orders.length > 0){
             return res.status(201).send(orders)
-        } else {
+        }else{
             return res.status(404).send("No pending or processing orders found.");
         }
-    } catch (error) {
+    }catch(error){
         res.status(401).send(error.message)
     }
 };
 
 //check previous order
-const previousOrder = async (req, res) => {
-    try {
+const previousOrder = async (req,res)=>{
+    try{
         const orders = await Order.find(
-            {
-                $and: [
-                    { consumerId: req.consumer._id },
-                    { status: { $in: ["completed", "canceled"] } }
-                ]
-            }
+            {$and:[
+                { consumerId: req.consumer._id },
+                {status: { $in: ["completed", "canceled"] } }
+            ]}
         );
-        if (orders.length > 0) {
+        if(orders.length > 0){
             return res.status(200).send(orders)
-        } else {
+        }else{
             return res.status(404).send("No complete or canceled orders found.");
         }
-    } catch (error) {
+    }catch(error){
         res.status(401).send(error.message)
     }
 };
 
 
 //contatus api send contact details to admin
-const contactUs = async (req, res) => {
+const contactUs = async(req,res)=>{
     try {
-        const { name, email, number } = req.body;
-
-        if (name, email, number) {
+        const {name,email,number} = req.body;
+        
+        if (name,email,number){
             const info = await transporter.sendMail({
-                from: "prabhatpanigrahi120@gmail.com",
-                to: "prabhatpanigrahi120@gmail.com",
-                subject: "contact to this person",
-                html: `<h1>consumer data <br> name: ${name} <br> email: ${email} <br> number: ${number}</h1>`
+                from:"prabhatpanigrahi120@gmail.com",
+                to:"prabhatpanigrahi120@gmail.com",
+                subject:"contact to this person",
+                html:`<h1>consumer data <br> name: ${name} <br> email: ${email} <br> number: ${number}</h1>` 
             })
-            return res.send({ "status": "success", "message": "for contact the person " + name });
-        } else {
+        return res.send({"status":"success","message":"for contact the person "+name});
+        }else{
             return res.send("all field is required");
         }
     } catch (error) {
@@ -376,10 +372,8 @@ const contactUs = async (req, res) => {
 
 
 
-module.exports = {
-    sendOTPToConsumer, signup, signin, sendLinkResetPassword, resetPassword, changePassword, getAllServices, getAllProducts, getService, getDesigner,
-    giveOrder, processingOrder, previousOrder, contactUs
-};
+module.exports = { sendOTPToConsumer, signup, signin,sendLinkResetPassword, resetPassword, changePassword, getAllServices, getAllProducts, getService, getDesigner,
+     giveOrder, processingOrder, previousOrder, contactUs };
 
 
 
