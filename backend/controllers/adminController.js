@@ -1,5 +1,4 @@
 const Product = require('../models/categoriesModel');
-const consumerProduct = require('../models/productModel')
 const Designer = require('../models/designModel');
 const Consumer = require('../models/consumerModel')
 const Services = require('../models/serviceModel');
@@ -163,7 +162,7 @@ const filterConsumerData = async (req, res) => {
     }
 };
 
-//designer add by admin
+
 const addDesigner = async (req, res) => {
     try {
         const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
@@ -221,7 +220,6 @@ const addDesigner = async (req, res) => {
 };
 
 
-//see the total_order with filter like between twodates
 const totalorder = async (req, res) => {
     try {
         const conditions = {};
@@ -244,7 +242,7 @@ const totalorder = async (req, res) => {
     }
 };
 
-//add product at productCategory model
+
 const addProduct = async (req, res) => {
     const { productName } = req.body;
     const profile_pic = req.file.filename;
@@ -270,7 +268,7 @@ const addProduct = async (req, res) => {
     }
 };
 
-//update the product at productCateory model
+
 const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
@@ -295,7 +293,7 @@ const editProduct = async (req, res) => {
     }
 };
 
-//delete the product from productCategory model
+
 const delProduct = async (req, res) => {
     const id = req.params.id;
     try {
@@ -307,8 +305,7 @@ const delProduct = async (req, res) => {
     }
 };
 
-// Admin can check total active Consumers
-// Admin can check total In active Consumers
+
 const checkConsumerStatus = async (req, res) => {
     try {
         // Query the database to count active consumers
@@ -352,7 +349,7 @@ const checkDesignerStatus = async (req, res) => {
     }
 }
 
-// Admin Can check the deleted Consumers.
+
 const checkDeletedConsumer = async (req, res) => {
     try {
         const consumer = await Consumer.find({ isDeleted: true });
@@ -384,7 +381,7 @@ const checkDeletedDesigner = async (req,res) => {
     }
 
 }
-//addservices in the  service document
+
 const addServices = async (req, res) => {
     try {
         const { serviceName } = req.body;
@@ -406,7 +403,7 @@ const addServices = async (req, res) => {
     }
 };
 
-//update services in the service document
+
 const editService = async (req, res) => {
     try {
         const id = req.params.id;
@@ -436,7 +433,7 @@ const editService = async (req, res) => {
     }
 };
 
-//add subservices in the subServiceModel
+
 const addSubService = async (req, res) => {
     const { subServiceName } = req.body;
     try {
