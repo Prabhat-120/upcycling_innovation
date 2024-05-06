@@ -13,32 +13,25 @@ const Order = require('../models/orderModel');
 const { default: mongoose } = require('mongoose');
 const Services = require('../models/serviceModel');
 
+const { isValidPassword, isValidEmail, isValidMob } = require('../Validator/validator')
+
 const secretkey = process.env.SECRETKEY
 
 //send otp
-const sendotp = async (req, res) => {
+const sendOTPToConsumer = async (req, res) => {
     const { email } = req.body;
     try {
-      if (!email) {
-        return res.status(400).send({ status: "failed", message: "Email is required." });
-      }
-      const newotp = new OTP({
-        otp: genotp(),
-        email
-      });
-      await newotp.save();
-      // Send OTP to email
-      const info = await transporter.sendMail({
-        from: "prabhatpanigrahi120@gmail.com",
-        to: email,
-        subject: "Verification Email",
-        html: `<h1>Please confirm your OTP</h1>
-        <p>Here is your OTP code: ${newotp.otp}</p>`,
-      });
-  
-      return res.send({ status: "success", message: "OTP sent to your email." });
+        const validEmail = isValidEmail(email);
+        if (!validEmail) {
+            return res.status(400).json({
+                status: "false",
+                message: "please enter correct email patteren & it should not have blank space",
+            });
+        }
+        const result = await sendotp(email);
+        return res.send(result);
     } catch (error) {
-        return res.status(500).send({ status: "error", message:error.message });
+        return res.status(500).send({ status: "error", message: error.message });
     }
 };
   
@@ -379,7 +372,7 @@ const contactUs = async(req,res)=>{
 
 
 
-module.exports = { sendotp, signup, signin,sendLinkResetPassword, resetPassword, changePassword, getAllServices, getAllProducts, getService, getDesigner,
+module.exports = { sendOTPToConsumer, signup, signin,sendLinkResetPassword, resetPassword, changePassword, getAllServices, getAllProducts, getService, getDesigner,
      giveOrder, processingOrder, previousOrder, contactUs };
 
 

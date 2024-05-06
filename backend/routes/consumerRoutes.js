@@ -5,7 +5,7 @@ const auth = require('../middlewares/auth-middleware').checkConsumerAuth;
 const uploadFile = require('../middlewares/upload-file');
 
 
-router.post('/consumer/otpsend', reqFieldMiddleware, consumerController.sendotp);
+router.post('/consumer/otpsend', reqFieldMiddleware, consumerController.sendOTPToConsumer);
 router.post('/consumer/register',  uploadFile , consumerController.signup);
 router.post('/consumer/login', reqFieldMiddleware, consumerController.signin);
 

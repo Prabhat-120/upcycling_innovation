@@ -3,18 +3,25 @@ const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const mobileRegex =/^\d{10}$/
 
-const isValidPassword = function (password) {
+  const isValidPassword = function (password) {
     if (passwordRegex.test(password)) return true;
     return false;
   };
 
   const isValidEmail = function (email) {
-    if (emailRegex.test(email)) return true;
+    if (emailRegex.test(email)) {return true;}
     return false;
   };
 
+  const isValidMob = function (mob) {
+    if (mobileRegex.test(mob)) return true;
+    return false;
+  }
+
   module.exports = {
     isValidPassword:isValidPassword,
-    isValidEmail:isValidEmail
+    isValidEmail:isValidEmail,
+    isValidMob:isValidMob
 }
