@@ -37,56 +37,71 @@ const sendOTPToConsumer = async (req, res) => {
   
 //register consumer
 const signup = async (req, res) => {
-    const {firstName, lastName, email, mob,  DOB, Gender, password, conf_password, term_cond, otp} = req.body;
-    profile_pic =  req.file.filename;
+    const { firstName, lastName, email, mob, DOB, Gender, password, otp } = req.body;
+    profile_pic = req.file.filename;
 
     try {
-        if (!firstName || !lastName || !email || !mob  || !profile_pic || !DOB || !Gender || !password || !conf_password || !term_cond || !otp){
+        if (!firstName || !lastName || !email || !mob || !profile_pic || !DOB || !Gender || !password || !otp) {
             return res.status(401).send("all fields are required");
         };
-        console.log(req.body)
 
-        const variotp = await OTP.findOne({ otp });
-
-        if (!variotp) {
-            return res.status(404).send("Your OTP is incorrect");
+        let validEmail = isValidEmail(email);
+        if (!validEmail) {
+            return res.status(400).json({
+                status: "false",
+                message: "please enter correct email patteren & it should not have blank space",
+            });
         }
-        if (variotp.email === email) {
-            const isExist = await Consumer.findOne({ email });
-            if (isExist) {
-                return res.status(401).send({ "status": "failed", "message": "This email already exists" });
-            } else {
-                if (password === conf_password) {
-                    const hashpassword = await bcrypt.hash(password, 10);
-                    
-                    fullname = firstName+ " " +lastName;
 
-                    const consumer = new Consumer({
-                        name:fullname,
-                        email,
-                        mob,
-                        images:profile_pic,
-                        DOB,
-                        Gender,
-                        password: hashpassword,
-                        term_cond,
-                        lastLogin: new Date() 
-                    });
-
-                    await consumer.save();
-                    
-                    // Delete the OTP document from the OTP schema
-                    await OTP.deleteOne({ otp });
-                    return res.status(200).send({ "status": "success", "message": "Register Successfull" });
-                } else {
-                    return res.status(401).send({ "status": "failed", "message": "Confirm password does not match with the password" });
-                }
-            }
-        } else {
-            res.status(401).json({ "status": "failed", "message": "You entered an incorrect OTP and email. Check your email and OTP" });
+        const isExist = await Consumer.findOne({ email });
+        if (isExist) {
+            return res.status(401).send({ "status": "failed", "message": "This email already exists" });
         }
+
+        let ValidMob = isValidMob(mob);
+        if (!ValidMob) {
+            return res.status(400).json({
+                status: "false",
+                message: "please enter Valid mobile Number(10digit) & it should not have blank space",
+            });
+        }
+
+
+        let validPassword = isValidPassword(password);
+        if (!validPassword) {
+            return res.status(400).json({
+                status: "false",
+                message: "Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character & it should not have blank space",
+            });
+        }
+
+        const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
+        
+        if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
+            return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
+        }
+
+        let fullname = firstName + " " + lastName;
+        const hashpassword = await bcrypt.hash(password, 10);
+
+        const consumer = new Consumer({
+            name: fullname,
+            email,
+            mob,
+            images: profile_pic,
+            DOB,
+            Gender,
+            password: hashpassword,
+            lastLogin: new Date()
+        });
+
+        await consumer.save();
+        await OTP.deleteOne({ otp });
+
+        return res.status(200).send({ "status": "success", "message": "Register Successfull" });
+
     } catch (error) {
-        res.send(error.message);
+        return res.send(error.message);
     }
 };
 
