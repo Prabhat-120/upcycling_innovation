@@ -46,7 +46,6 @@ const sendotp = async (req, res) => {
 
 
 const signUp = async (req, res) => {
-
     const { name, email, password, otp } = req.body;
     const image = req.file.filename;
     try {
@@ -86,7 +85,6 @@ const signUp = async (req, res) => {
 const signin = async (req, res) => {
     const { email, password } = req.body;
     try {
-
         const designer = await Admin.findOne({ email });
         if (!designer) {
             return res.status(401).send({ status: "false", message: "This email is not registered" });
@@ -128,9 +126,7 @@ const getAllDesigner = async (req, res) => {
 
 
 const filterDesignerData = async (req, res) => {
-
     try {
-
         const conditions = {};
         if (req.query.sDate && req.query.eDate) {
             conditions.createdAt = { $gt: new Date(req.query.sDate), $lte: new Date(req.query.eDate) }
@@ -155,51 +151,6 @@ const filterDesignerData = async (req, res) => {
         return res.status(401).send(error.message);
     }
 };
-
-//filter designer with between tow dates
-// const getDesignerWithDate = async (req, res) => {
-
-//     const { start, end } = req.body;
-//     if (!start || !end) {
-//         return res.status(401).json({ "status": "failed", "message": "all field are required" });
-//     };
-
-//     const startDate = new Date(start);
-//     const endDate = new Date(end);
-
-//     try {
-//         const designer = await Designer.find({ createdAt: { $gt: startDate, $lte: endDate } });
-
-//         if (designer.length === 0) {
-//             return res.status(201).json({ "status": "success", "message": "no designer between this date" })
-//         };
-
-//         return res.status(201).json({ status: "success", total_designer: designer.length, data: designer });
-//     } catch (error) {
-//         return res.status(401).send(error.message)
-//     }
-// };
-
-
-// //filter designer With Name
-// const getDesignerWithName = async (req, res) => {
-//     const { name } = req.body;
-
-//     if (!name) {
-//         return res.status(401).json({ "status": "failed", "message": "all field are required" });
-//     }
-//     try {
-//         const designer = await Designer.find({ name: name });
-
-//         if (designer.length === 0) {
-//             return res.status(201).json({ "status": "success", "message": "name doesnot match with designer" })
-//         };
-
-//         return res.status(201).json({ status: "success", total_consumer: designer.length, Data: designer })
-//     } catch (error) {
-//         return res.status(401).send(error.message);
-//     }
-// }
 
 
 //for dashboard count totalConsumer 
@@ -242,53 +193,6 @@ const filterConsumerData = async (req, res) => {
 
 
 
-
-// //filter consumer between twodate
-// const filterConsumerWithDate = async (req, res) => {
-
-//     const { startdate, enddate } = req.body;
-//     if (!startdate || !enddate) {
-//         return res.status(401).json({ "status": "false", "message": "all field is required" })
-//     };
-
-//     try {
-//         //convert like database type date
-//         const startDate = new Date(startdate);
-//         const endDate = new Date(enddate);
-
-//         const consumer = await Consumer.find(
-//             { createdAt: { $gt: startDate, $lte: endDate } }
-//         );
-
-//         if (consumer.length === 0) {
-//             return res.status(201).json({ "status": "true", "message": "no consumer can registered between this Date" });
-//         };
-
-//         return res.status(201).send(consumer)
-//     } catch (error) {
-//         return res.status(401).send(error.message);
-//     }
-// };
-
-
-// //filter consumer with name 
-// const filterConsumerWithName = async (req, res) => {
-//     const { name } = req.body
-//     if (!name) {
-//         return res.status(401).json({ "status": "false", "message": "field is required" })
-//     };
-//     try {
-//         const consumer = await Consumer.find({ name: name });
-//         if (consumer.length === 0) {
-//             return res.status(201).json({ "status": "true", "message": "this name not match with any consumer" });
-//         }
-//         return res.status(201).send(consumer);
-//     } catch (error) {
-//         return res.status(401).send(error.message);
-//     }
-// };
-
-//admin add designer
 const addDesigner = async (req, res) => {
     try {
         const { name, mob, email, address, location, categories, services, subservices, Bio, password, otp } = req.body;
