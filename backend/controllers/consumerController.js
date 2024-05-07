@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // const genotp = require('../services/OtpServices');
-// const transporter = require("../Config/mailconfig");
+const transporter = require("../Config/mailconfig");
 
 const OTP = require('../models/otpModel');
 const sendotp = require('../services/sendOTPByEmail');
@@ -235,7 +235,6 @@ const changePassword = async (req, res) => {
 };
 
 
-//get all products from Categories which admin are push
 const getAllProducts = async (req, res) => {
     try {
         const projection = { updatedAt: 0 }
@@ -247,7 +246,6 @@ const getAllProducts = async (req, res) => {
 };
 
 
-//get all services at home page
 const getAllServices = async (req, res) => {
     try {
         const projection = {
@@ -263,7 +261,6 @@ const getAllServices = async (req, res) => {
 }
 
 
-//search for product and services
 const searching = async (req, res) => {
     const query = req.query.q;
     try {
@@ -414,13 +411,13 @@ const getDesigner = async (req, res) => {
 };
 
 
-//give order to designer
 const giveOrder = async (req, res) => {
-    const { orderDesc, photo, tailorId, productId, serviceId } = req.body;
+    const { orderDesc,  tailorId, productId, serviceId } = req.body;
+    const profile_pic = req.file.filename;
     try {
         const newOrder = new Order({
             orderDesc,
-            photo,
+            photo:profile_pic,
             productId,
             serviceId,
             consumerId: req.consumer._id,

@@ -22,7 +22,7 @@ router.get('/consumer/search', auth, consumerController.searching);
 
 router.post('/consumer/nearestDesigner', auth, consumerController.getDesigner);
 
-router.post('/consumer/order', reqFieldMiddleware, auth, consumerController.giveOrder);
+router.post('/consumer/order',  auth, uploadFile, consumerController.giveOrder);
 
 router.get('/consumer/pendingOrder', auth, consumerController.processingOrder);
 router.get('/consumer/previousOrder', auth, consumerController.previousOrder);
