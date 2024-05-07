@@ -258,24 +258,15 @@ const sendOtpForResetPass = async (req, res) => {
 
 //verify otp for resetpassword
 const verifyOtpResetPass = async (req, res) => {
-  const { otp, email } = req.body;
   try {
-    let validEmail = isValidEmail(email);
-    if (!validEmail) {
-      return res.status(400).json({
-        status: "false",
-        message: "please enter correct email patteren",
-      });
-    }
-    const otpDocument = await OTP.findOne({ email, otp });       // Find the OTP document by email and OTP value
-    if (!otpDocument) {
-      return res.status(404).send({ "status": "false", "message": "OTP not found or expired" });
+    const { otp, email } = req.body;
+    console.log(req.body)
+    const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
+    console.log(latestOtp);
+    if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
+      return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
     }
 
-    // Check if the OTP has expired
-    if (otpDocument.expiresAt < new Date()) {
-      return res.status(401).send({ "status": "false", "message": "OTP expired" });
-    }
     //await OTP.deleteOne({ email, otp });
     return res.status(200).send({ "status": "true", "message": "OTP verified successfully" });
   } catch (error) {
@@ -618,7 +609,7 @@ const previousOrder = async (req, res) => {
       return res.status(202).send({ message: "does not have any previous order", status: "empty" });
     }
 
-    return res.status(201).send({"status":true, messaage:"successfull listed", data:orders});
+    return res.status(201).send({ "status": true, messaage: "successfull listed", data: orders });
   } catch (error) {
     return res.status(401).send(error.message);
   }
