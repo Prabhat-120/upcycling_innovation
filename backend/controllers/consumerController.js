@@ -41,9 +41,8 @@ const sendOTPToConsumer = async (req, res) => {
 const signup = async (req, res) => {
     const { firstName, lastName, email, mob, DOB, Gender, password, term_cond, otp } = req.body;
     profile_pic = req.file.filename;
-
     try {
-        if (!firstName || !lastName || !email || !mob || !profile_pic || !DOB || !Gender || !password || !term_cond || !otp) {
+        if (!firstName || !lastName || !email || !mob || !profile_pic || !DOB || !Gender || !password || !otp) {
             return res.status(401).send("all fields are required");
         };
 
@@ -67,7 +66,6 @@ const signup = async (req, res) => {
                 message: "please enter Valid mobile Number & it should not have blank space",
             });
         }
-
 
         let validPassword = isValidPassword(password);
         if (!validPassword) {

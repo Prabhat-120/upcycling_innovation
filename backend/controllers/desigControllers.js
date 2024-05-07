@@ -299,7 +299,7 @@ const resetpassword = async (req, res) => {
 
       if (checkPreviousPass) {
         return res
-          .status(406)
+          .status(201)
           .send({ status: "false", message: "enter a new password. your password are same with previous password" });
       } else {
         const hashPassword = await bcrypt.hash(password, 10);
