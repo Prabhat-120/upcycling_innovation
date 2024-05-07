@@ -76,7 +76,6 @@ const signup = async (req, res) => {
         }
 
         const latestOtp = await OTP.find({ email }).sort({ expiresAt: -1 }).limit(1);
-        console.log(latestOtp)
         if (!latestOtp.length || latestOtp[0].otp !== parseInt(otp) || latestOtp[0].expiresAt < new Date()) {
             return res.status(401).json({ status: "false", message: "Invalid or expired OTP" });
         }
