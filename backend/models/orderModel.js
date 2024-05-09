@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Designer = require('./designModel');
 const Consumer = require('./consumerModel');
+const Category = require('./categoriesModel');
+const Service = require('./serviceModel');
 
 const orderSchema = new mongoose.Schema({
     orderDesc:{
@@ -12,10 +14,14 @@ const orderSchema = new mongoose.Schema({
         required:true
     },
     productCategory:{
-        type:String
+        type:mongoose.Schema.Types.ObjectId,
+        ref:Category,
+        default:null
     },
     service:{
-        type:String
+        type:mongoose.Schema.Types.ObjectId,
+        ref:Service,
+        default:null
     },
     consumerId:{
         type:mongoose.Schema.Types.ObjectId,

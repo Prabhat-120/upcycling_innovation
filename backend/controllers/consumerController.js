@@ -412,14 +412,25 @@ const getDesigner = async (req, res) => {
 
 
 const giveOrder = async (req, res) => {
-    const { orderDesc,  tailorId, productId, serviceId } = req.body;
+    const { orderDesc, tailorId, productId, serviceId } = req.body;
     const profile_pic = req.file.filename;
     try {
+
+        let productCategory = null;
+        let service = null;
+
+        if (productId && productId.trim() !== '') {
+            productCategory = productId;
+        }
+        if (serviceId && serviceId.trim() !== '') {
+            service = serviceId;
+        }
+        
         const newOrder = new Order({
             orderDesc,
-            photo:profile_pic,
-            productId,
-            serviceId,
+            photo: profile_pic,
+            ...(productCategory && { productCategory }),
+            ...(service && { service }),
             consumerId: req.consumer._id,
             tailorId,
             status: "pending",
@@ -427,15 +438,15 @@ const giveOrder = async (req, res) => {
             orderCompleteDate: null
         });
 
+        console.log(newOrder);
         await newOrder.save();
-        return res.status(201).send("order placed successfull.waiting for designer confirmation.");
+        return res.status(201).send({ status: "true", message: "order placed successfull.waiting for designer confirmation." });
     } catch (error) {
-        return res.status(400).send(error.message)
+        return res.status(400).send({ error: error.message })
     }
 };
 
 
-//1.for continued order
 const processingOrder = async (req, res) => {
     try {
         const orders = await Order.find(
@@ -445,14 +456,14 @@ const processingOrder = async (req, res) => {
                     { status: { $in: ["pending", "processing", "confirm"] } }
                 ]
             }
-        );
+        ).populate([{ path: 'tailorId', select: 'profile_pic name -_id' }]);
         if (orders.length > 0) {
-            return res.status(201).send(orders)
+            return res.status(201).send({status:"true", message:"pending orders", data:orders})
         } else {
-            return res.status(404).send("No pending or processing orders found.");
+            return res.status(404).send({status:"false",message:"No pending or processing orders found."});
         }
     } catch (error) {
-        return res.status(401).send(error.message)
+        return res.status(401).send({error:error.message})
     }
 };
 
@@ -468,9 +479,9 @@ const previousOrder = async (req, res) => {
             }
         );
         if (orders.length > 0) {
-            return res.status(200).send(orders)
+            return res.status(200).send({ status: "true", message: "previous orders", data: orders })
         } else {
-            return res.status(404).send("No complete or canceled orders found.");
+            return res.status(404).send({ status: "false", message: "No complete or canceled orders found." });
         }
     } catch (error) {
         return res.status(401).send(error.message)
