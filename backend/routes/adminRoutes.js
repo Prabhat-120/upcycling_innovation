@@ -16,14 +16,13 @@ router.get('/admin/filterDesigner', auth, adminController.filterDesignerData);
 router.get('/admin/filterOrderDate', auth, adminController.totalorder);
 router.post('/admin/addDesigner', uploadFile, adminController.addDesigner);
 
-router.post('/admin/addCategory', uploadFile, adminController.addProduct);
+router.post('/admin/addCategory', auth, uploadFile, adminController.addProduct);
 router.post('/admin/editCategory/:id', uploadFile, adminController.editProduct);
 router.post('/admin/delCategory/:id', adminController.delProduct);
 
-router.post('/admin/addServices', uploadFile, auth, adminController.addServices);
-router.post('/admin/updateServices/:id',)
+router.post('/admin/addServices', auth, uploadFile, adminController.addServices);
 
-router.post('/admin/addSubservices', fieldrequire, auth, adminController.addSubService)
+router.post('/admin/addSubservices', auth,fieldrequire,  adminController.addSubService)
 
 
 router.get('/admin/checkConsumerStatus', auth, adminController.checkConsumerStatus);
