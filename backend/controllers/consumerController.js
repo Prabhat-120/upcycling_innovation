@@ -342,7 +342,7 @@ const getDesigner = async (req, res) => {
                     near: { type: "Point", coordinates: [long, lati] },
                     key: "location",
                     distanceField: "dist.calculated",
-                    maxDistance: parseFloat(100000) * 1609,
+                    maxDistance: parseFloat(1000) * 1609,
                     query: matchQuery,
                     spherical: true
                 }
@@ -425,7 +425,7 @@ const giveOrder = async (req, res) => {
         if (serviceId && serviceId.trim() !== '') {
             service = serviceId;
         }
-        
+
         const newOrder = new Order({
             orderDesc,
             photo: profile_pic,
@@ -458,12 +458,12 @@ const processingOrder = async (req, res) => {
             }
         ).populate([{ path: 'tailorId', select: 'profile_pic name -_id' }]);
         if (orders.length > 0) {
-            return res.status(201).send({status:"true", message:"pending orders", data:orders})
+            return res.status(201).send({ status: "true", message: "pending orders", data: orders })
         } else {
-            return res.status(404).send({status:"false",message:"No pending or processing orders found."});
+            return res.status(404).send({ status: "false", message: "No pending or processing orders found." });
         }
     } catch (error) {
-        return res.status(401).send({error:error.message})
+        return res.status(401).send({ error: error.message })
     }
 };
 
